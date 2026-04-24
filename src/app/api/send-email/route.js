@@ -1,30 +1,28 @@
-import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-/**
- * POST /api/send-email
- * Body: { to, subject, html, replyTo? }
- * Requires RESEND_API_KEY in env. Call this from server components or other
- * API routes — do NOT call directly from browser JS (no auth check).
- */
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { to, subject, html, replyTo } = await req.json();
+    const { to, subject, html } = await request.json();
+
     if (!to || !subject || !html) {
-      return NextResponse.json({ ok: false, error: 'missing fields' }, { status: 400 });
+      return Response.json({ error: 'Missing fields' }, { status: 400 });
     }
-    if (!process.env.RESEND_API_KEY) {
-      return NextResponse.json({ ok: false, error: 'RESEND_API_KEY not configured' }, { status: 500 });
+
+    const { data, error } = await resend.emails.send({
+      from: 'Homeizz <notifications@homeizz.in>',
+      to,
+      subject,
+      html,
+    });
+
+    if (error) {
+      return Response.json({ error }, { status: 400 });
     }
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const from = process.env.RESEND_FROM_EMAIL || 'Homeizz <hello@homeizz.com>';
-    const { error } = await resend.emails.send({ from, to, subject, html, replyTo });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true });
+
+    return Response.json({ success: true, data });
   } catch (e) {
-    return NextResponse.json({ ok: false, error: 'server error' }, { status: 500 });
+    return Response.json({ error: e.message }, { status: 500 });
   }
 }
