@@ -23,6 +23,7 @@ h3{font-size:clamp(1.1rem,2vw,1.4rem);}
 em{font-style:italic;color:var(--t);}
 p{color:var(--tm);line-height:1.75;}
 input,select,textarea,button{font-family:var(--fb);}
+a{text-decoration:none;color:inherit;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-thumb{background:var(--sandl);border-radius:3px;}
 
