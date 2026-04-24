@@ -26,7 +26,7 @@ function AuthForm() {
       if (data.user) {
         const meta = data.user.user_metadata;
         if (meta?.role === 'professional') router.push('/pro-dashboard');
-        else router.push(redirect);
+        else router.push(redirect === '/' ? '/dashboard' : redirect);
       }
     });
   }, []);
@@ -57,7 +57,7 @@ function AuthForm() {
         if (error) throw error;
         const meta = data.user?.user_metadata;
         if (meta?.role === 'professional') router.push('/pro-dashboard');
-        else router.push(redirect);
+        else router.push(redirect === '/' ? '/dashboard' : redirect);
       }
     } catch (e2) {
       setErr(e2.message || 'Something went wrong');
