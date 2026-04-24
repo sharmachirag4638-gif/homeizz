@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 
 export const dynamic = 'force-dynamic';
@@ -8,30 +8,47 @@ export const dynamic = 'force-dynamic';
 export default function AuthPage() {
   const sb = createClient();
   const router = useRouter();
-  const [mode, setMode] = useState('signin');
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
+  const defaultMode = searchParams.get('mode') || 'signin';
+
+  const [mode, setMode] = useState(defaultMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState('homeowner');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    sb.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        const meta = data.user.user_metadata;
+        if (meta?.role === 'professional') router.push('/pro-dashboard');
+        else router.push(redirect);
+      }
+    });
+  }, []);
 
   async function submit(e) {
     e.preventDefault();
-    setBusy(true); setErr('');
+    setBusy(true); setErr(''); setSuccess('');
     try {
       if (mode === 'signup') {
-        const { data, error } = await sb.auth.signUp({
+        const { error } = await sb.auth.signUp({
           email, password,
-          options: { data: { full_name: fullName, phone, role } },
+          options: { data: { full_name: fullName, phone, role: 'homeowner' } },
         });
         if (error) throw error;
-        router.push('/dashboard');
+        setSuccess('Account created! Check your email to verify, then sign in.');
+        setMode('signin');
       } else {
-        const { error } = await sb.auth.signInWithPassword({ email, password });
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push('/dashboard');
+        const meta = data.user?.user_metadata;
+        if (meta?.role === 'professional') router.push('/pro-dashboard');
+        else router.push(redirect);
       }
     } catch (e2) {
       setErr(e2.message || 'Something went wrong');
@@ -40,53 +57,73 @@ export default function AuthPage() {
     }
   }
 
+  const inputStyle = { width:'100%', padding:'12px 14px', border:'1.5px solid var(--borderl)', borderRadius:10, fontSize:'.9rem', color:'var(--b)', background:'#fff', outline:'none', fontFamily:'var(--fb)', boxSizing:'border-box' };
+  const labelStyle = { display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--b)', marginBottom:6 };
+
   return (
-    <div className="auth-screen">
-      <div className="auth-box">
-        <div className="auth-logo">Home<span style={{ color:'#C8A882' }}>izz</span></div>
-        <p className="auth-sub">Welcome back, or join us — free to get started.</p>
-        <div className="tabs">
-          <button type="button" onClick={() => setMode('signin')} className={`tab ${mode==='signin' ? 'on':''}`}>Sign in</button>
-          <button type="button" onClick={() => setMode('signup')} className={`tab ${mode==='signup' ? 'on':''}`}>Create account</button>
+    <div style={{minHeight:'100vh',background:'var(--c)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+      <div style={{width:'100%',maxWidth:440}}>
+        <div style={{textAlign:'center',marginBottom:32}}>
+          <div onClick={()=>router.push('/')} style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:'var(--b)',cursor:'pointer',display:'inline-block'}}>
+            Home<span style={{color:'var(--t)'}}>izz</span>
+          </div>
+          <p style={{color:'var(--tlt)',fontSize:'.88rem',marginTop:6}}>
+            {mode==='signup'?'Create your free homeowner account':'Welcome back!'}
+          </p>
         </div>
-        {err && <div className="err-box" style={{ display:'block' }}>{err}</div>}
-        <form onSubmit={submit}>
-          {mode === 'signup' && (
-            <>
-              <div className="utypes">
-                <div className={`utype ${role==='homeowner' ? 'on':''}`} onClick={() => setRole('homeowner')}>
-                  <div className="utype-ico">🏠</div>
-                  <div className="utype-t">Homeowner</div>
-                  <div className="utype-s">Looking for designs</div>
-                </div>
-                <div className={`utype ${role==='designer' ? 'on':''}`} onClick={() => setRole('designer')}>
-                  <div className="utype-ico">🎨</div>
-                  <div className="utype-t">Designer</div>
-                  <div className="utype-s">Offering services</div>
-                </div>
-              </div>
-              <div className="fg">
-                <label htmlFor="fn">Full name</label>
-                <input id="fn" required value={fullName} onChange={e=>setFullName(e.target.value)} />
-              </div>
-              <div className="fg">
-                <label htmlFor="ph">Phone (India)</label>
-                <input id="ph" type="tel" inputMode="numeric" pattern="[0-9]{10}" required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="9876543210" />
-              </div>
-            </>
-          )}
-          <div className="fg">
-            <label htmlFor="em">Email</label>
-            <input id="em" type="email" required value={email} onChange={e=>setEmail(e.target.value)} />
+
+        <div style={{background:'#fff',borderRadius:20,padding:'32px',border:'1.5px solid var(--borderl)',boxShadow:'var(--shm)'}}>
+          <div style={{display:'flex',background:'var(--c)',borderRadius:12,padding:4,marginBottom:24}}>
+            {['signin','signup'].map(m=>(
+              <button key={m} onClick={()=>{setMode(m);setErr('');setSuccess('');}} style={{flex:1,padding:'10px',border:'none',borderRadius:10,background:mode===m?'#fff':'transparent',color:mode===m?'var(--t)':'var(--tlt)',fontWeight:700,cursor:'pointer',fontSize:'.88rem',boxShadow:mode===m?'var(--sh)':'none',transition:'all .2s'}}>
+                {m==='signin'?'Sign In':'Create Account'}
+              </button>
+            ))}
           </div>
-          <div className="fg">
-            <label htmlFor="pw">Password</label>
-            <input id="pw" type="password" minLength={8} required value={password} onChange={e=>setPassword(e.target.value)} />
+
+          {err&&<div style={{background:'#FEF2F2',border:'1px solid #FECACA',color:'#DC2626',borderRadius:10,padding:'12px 16px',marginBottom:16,fontSize:'.85rem'}}>{err}</div>}
+          {success&&<div style={{background:'#F0FDF4',border:'1px solid #86EFAC',color:'#166534',borderRadius:10,padding:'12px 16px',marginBottom:16,fontSize:'.85rem'}}>✅ {success}</div>}
+
+          <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:16}}>
+            {mode==='signup'&&(
+              <>
+                <div style={{background:'var(--tpp)',borderRadius:12,padding:'12px 16px',border:'1.5px solid var(--tp)',display:'flex',alignItems:'center',gap:10}}>
+                  <span style={{fontSize:'1.5rem'}}>🏠</span>
+                  <div>
+                    <div style={{fontWeight:700,color:'var(--b)',fontSize:'.85rem'}}>Homeowner Account</div>
+                    <div style={{fontSize:'.75rem',color:'var(--tlt)'}}>Free forever · Browse & contact designers</div>
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle}>Full Name</label>
+                  <input required value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="Amit Sharma" style={inputStyle}/>
+                </div>
+                <div>
+                  <label style={labelStyle}>Phone Number</label>
+                  <input type="tel" required value={phone} onChange={e=>setPhone(e.target.value)} placeholder="9876543210" style={inputStyle}/>
+                </div>
+              </>
+            )}
+            <div>
+              <label style={labelStyle}>Email Address</label>
+              <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" style={inputStyle}/>
+            </div>
+            <div>
+              <label style={labelStyle}>Password</label>
+              <input type="password" minLength={8} required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Min 8 characters" style={inputStyle}/>
+            </div>
+            <button type="submit" disabled={busy} style={{padding:'14px',background:busy?'var(--borderl)':'var(--t)',color:'#fff',border:'none',borderRadius:12,fontWeight:700,cursor:busy?'not-allowed':'pointer',fontSize:'.95rem',boxShadow:busy?'none':'0 6px 20px rgba(196,98,45,.3)',marginTop:4}}>
+              {busy?'Please wait...':mode==='signup'?'Create Free Account →':'Sign In →'}
+            </button>
+          </form>
+
+          <div style={{textAlign:'center',marginTop:20,paddingTop:20,borderTop:'1px solid var(--borderl)'}}>
+            <p style={{fontSize:'.8rem',color:'var(--tlt)',marginBottom:10}}>Are you a designer or architect?</p>
+            <button onClick={()=>router.push('/pro-signup')} style={{padding:'10px 20px',background:'transparent',color:'var(--t)',border:'1.5px solid var(--t)',borderRadius:10,fontWeight:600,cursor:'pointer',fontSize:'.82rem'}}>
+              Join as Professional →
+            </button>
           </div>
-          <button type="submit" className="ubtn" disabled={busy}>
-            {busy ? 'Please wait…' : (mode==='signup' ? 'Create my account' : 'Sign in')}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
