@@ -28,7 +28,7 @@ const INSPIRATION = [
   'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80',
   'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&q=80',
   'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=600&q=80',
-  'https://images.unsplash.com/photo-1574643156929-51fa098b0394?w=600&q=80',
+  'https://images.unsplash.com/photo-1615529328331-f8917597711f?w=600&q=80',
 ];
 
 const BLOGS = [
@@ -140,7 +140,13 @@ export default function HomePage() {
             <div style={{columns:'3 300px',gap:16}}>
               {INSPIRATION.map((img,i)=>(
                 <div key={i} style={{breakInside:'avoid',marginBottom:16,borderRadius:16,overflow:'hidden'}}>
-                  <img src={img} alt={`Inspiration ${i+1}`} style={{width:'100%',display:'block'}} loading="lazy"/>
+                  <img
+                    src={img}
+                    alt={`Inspiration ${i+1}`}
+                    style={{width:'100%',display:'block'}}
+                    loading="lazy"
+                    onError={e=>{e.target.style.display='none';e.target.parentElement.style.display='none';}}
+                  />
                 </div>
               ))}
             </div>
@@ -162,37 +168,6 @@ export default function HomePage() {
                   <div style={{position:'absolute',bottom:16,left:20}}>
                     <div style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'1.4rem',fontWeight:600}}>{city.name}</div>
                     <div style={{color:'rgba(255,255,255,.7)',fontSize:'.75rem'}}>View designers →</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* BLOG */}
-        <section style={{padding:'80px 44px',background:'var(--c)'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:40}}>
-              <div>
-                <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tlt)',marginBottom:12}}>From Our Blog</div>
-                <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Design guides &<br/><em>expert advice</em></h2>
-              </div>
-              <Link href="/blog" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 24px',background:'transparent',color:'var(--t)',border:'1.5px solid var(--t)',borderRadius:50,fontWeight:600,fontSize:'.88rem',textDecoration:'none'}}>
-                All articles →
-              </Link>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}>
-              {BLOGS.map((blog,i)=>(
-                <Link key={i} href={blog.href} style={{textDecoration:'none',display:'block',background:'#fff',borderRadius:16,overflow:'hidden',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
-                  <div style={{height:200,overflow:'hidden'}}>
-                    <img src={blog.img} alt={blog.title} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                  </div>
-                  <div style={{padding:'20px'}}>
-                    <div style={{display:'flex',gap:8,marginBottom:12}}>
-                      <span style={{fontSize:'.7rem',fontWeight:600,color:'var(--t)',background:'var(--tpp)',padding:'3px 10px',borderRadius:50}}>{blog.city}</span>
-                      <span style={{fontSize:'.7rem',color:'var(--tlt)'}}>{blog.time}</span>
-                    </div>
-                    <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',fontSize:'1.1rem',lineHeight:1.3}}>{blog.title}</h3>
                   </div>
                 </Link>
               ))}

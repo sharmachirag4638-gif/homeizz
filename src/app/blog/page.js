@@ -1,11 +1,6 @@
-import Link from 'next/link';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
-
-export const metadata = {
-  title: 'Home Design Blog — Tips, Guides & Inspiration | Homeizz',
-  description: 'Expert advice on interior design, architecture, and home renovation in India.',
-};
+import Link from 'next/link';
 
 const POSTS = [
   { slug:'top-interior-designers-mumbai', title:'Top 10 Interior Designers in Mumbai 2026', excerpt:'Discover the most talented and highly-rated interior designers in Mumbai. Compare portfolios and find the perfect match for your home.', city:'Mumbai', time:'5 min read', img:'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80', category:'City Guide' },
@@ -16,55 +11,76 @@ const POSTS = [
   { slug:'questions-ask-interior-designer', title:'10 Questions to Ask Your Interior Designer Before Hiring', excerpt:'Make sure you are making the right choice. These key questions will help you find the perfect designer.', city:'Tips', time:'4 min read', img:'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80', category:'Tips' },
 ];
 
-export default function BlogPage() {
-  const featured = POSTS[0];
-  const rest = POSTS.slice(1);
+export async function generateStaticParams() {
+  return POSTS.map(p => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({ params }) {
+  const post = POSTS.find(p => p.slug === params.slug);
+  return {
+    title: post ? `${post.title} | Homeizz Blog` : 'Blog | Homeizz',
+    description: post?.excerpt || '',
+  };
+}
+
+export default function BlogPostPage({ params }) {
+  const post = POSTS.find(p => p.slug === params.slug);
+
+  if (!post) {
+    return (
+      <>
+        <Nav/>
+        <div style={{minHeight:'100vh',background:'var(--c)',paddingTop:64,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{textAlign:'center'}}>
+            <h1 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:12}}>Post not found</h1>
+            <Link href="/blog" style={{color:'var(--t)',fontWeight:600}}>← Back to Blog</Link>
+          </div>
+        </div>
+        <Footer/>
+      </>
+    );
+  }
+
   return (
     <>
       <Nav/>
-      <div style={{background:'var(--c)',minHeight:'100vh',paddingTop:64}}>
-        <div style={{background:'var(--b)',padding:'60px 44px'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
-            <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tl)',marginBottom:12}}>Homeizz Blog</div>
-            <h1 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:12}}>Design guides &<br/><em style={{color:'var(--tl)'}}>expert advice</em></h1>
-            <p style={{color:'rgba(255,255,255,.55)',maxWidth:480,fontSize:'.95rem'}}>Tips, inspiration and city guides to help you build your dream home</p>
+      <div style={{minHeight:'100vh',background:'var(--c)',paddingTop:64}}>
+
+        {/* Hero */}
+        <div style={{width:'100%',height:420,overflow:'hidden',position:'relative'}}>
+          <img src={post.img} alt={post.title} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+          <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,.7) 0%,rgba(0,0,0,.2) 60%)'}}/>
+          <div style={{position:'absolute',bottom:40,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:760,padding:'0 24px'}}>
+            <div style={{display:'flex',gap:10,marginBottom:16}}>
+              <span style={{fontSize:'.72rem',fontWeight:700,color:'#fff',background:'var(--t)',padding:'4px 12px',borderRadius:50}}>{post.category}</span>
+              <span style={{fontSize:'.72rem',color:'rgba(255,255,255,.7)',padding:'4px 0'}}>{post.time}</span>
+            </div>
+            <h1 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'clamp(1.6rem,4vw,2.6rem)',lineHeight:1.2}}>{post.title}</h1>
           </div>
         </div>
-        <div style={{maxWidth:1100,margin:'0 auto',padding:'48px 44px 80px'}}>
 
-          {/* Featured */}
-          <Link href={`/blog/${featured.slug}`} style={{textDecoration:'none',display:'grid',gridTemplateColumns:'1fr 1fr',gap:0,background:'#fff',borderRadius:20,overflow:'hidden',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)',marginBottom:40}}>
-            <div style={{height:360,overflow:'hidden'}}>
-              <img src={featured.img} alt={featured.title} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-            </div>
-            <div style={{padding:'40px',display:'flex',flexDirection:'column',justifyContent:'center'}}>
-              <div style={{display:'flex',gap:8,marginBottom:16}}>
-                <span style={{fontSize:'.7rem',fontWeight:700,color:'var(--t)',background:'var(--tpp)',padding:'4px 12px',borderRadius:50}}>{featured.category}</span>
-                <span style={{fontSize:'.7rem',color:'var(--tlt)',padding:'4px 0'}}>{featured.time}</span>
-              </div>
-              <h2 style={{fontFamily:'var(--fd)',color:'var(--b)',fontSize:'1.8rem',marginBottom:16,lineHeight:1.2}}>{featured.title}</h2>
-              <p style={{color:'var(--tlt)',fontSize:'.9rem',lineHeight:1.75,marginBottom:24}}>{featured.excerpt}</p>
-              <span style={{color:'var(--t)',fontWeight:700,fontSize:'.88rem'}}>Read article →</span>
-            </div>
+        {/* Content */}
+        <div style={{maxWidth:760,margin:'0 auto',padding:'48px 24px 80px'}}>
+          <Link href="/blog" style={{display:'inline-flex',alignItems:'center',gap:6,color:'var(--t)',fontWeight:600,fontSize:'.88rem',textDecoration:'none',marginBottom:32}}>
+            ← Back to Blog
           </Link>
 
-          {/* Grid */}
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:24}}>
-            {rest.map(post=>(
-              <Link key={post.slug} href={`/blog/${post.slug}`} style={{textDecoration:'none',display:'block',background:'#fff',borderRadius:16,overflow:'hidden',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
-                <div style={{height:200,overflow:'hidden'}}>
-                  <img src={post.img} alt={post.title} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-                </div>
-                <div style={{padding:'20px'}}>
-                  <div style={{display:'flex',gap:8,marginBottom:12}}>
-                    <span style={{fontSize:'.7rem',fontWeight:700,color:'var(--t)',background:'var(--tpp)',padding:'3px 10px',borderRadius:50}}>{post.category}</span>
-                    <span style={{fontSize:'.7rem',color:'var(--tlt)'}}>{post.time}</span>
-                  </div>
-                  <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',fontSize:'1.15rem',lineHeight:1.3,marginBottom:10}}>{post.title}</h3>
-                  <p style={{color:'var(--tlt)',fontSize:'.82rem',lineHeight:1.6,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{post.excerpt}</p>
-                </div>
-              </Link>
-            ))}
+          <p style={{fontSize:'1.1rem',color:'var(--tlt)',lineHeight:1.85,marginBottom:32,borderLeft:'3px solid var(--t)',paddingLeft:20,fontStyle:'italic'}}>
+            {post.excerpt}
+          </p>
+
+          <div style={{background:'#fff',borderRadius:16,padding:'32px',border:'1.5px solid var(--borderl)',marginBottom:32}}>
+            <p style={{color:'var(--tm)',lineHeight:1.85,fontSize:'.95rem'}}>
+              This is a detailed guide about <strong>{post.title}</strong>. Full article content coming soon. In the meantime, browse our verified professionals on Homeizz and find the perfect designer for your project.
+            </p>
+          </div>
+
+          <div style={{background:'var(--tpp)',borderRadius:16,padding:'28px 32px',border:'1.5px solid var(--t)',textAlign:'center'}}>
+            <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:8}}>Ready to find your designer?</h3>
+            <p style={{color:'var(--tlt)',fontSize:'.9rem',marginBottom:20}}>Browse verified architects and interior designers across India.</p>
+            <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 28px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'.9rem',textDecoration:'none'}}>
+              Browse Designers →
+            </Link>
           </div>
         </div>
       </div>
