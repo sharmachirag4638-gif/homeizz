@@ -10,6 +10,7 @@ function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+  const role = searchParams.get('role') || 'homeowner';
   const [otp, setOtp] = useState(['','','','','','']);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -35,7 +36,12 @@ function VerifyForm() {
     try {
       const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
       if (error) throw error;
-      router.push('/');
+      // Redirect based on role
+      if (role === 'professional') {
+        router.push('/pro-dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     } catch(e) {
       setErr(e.message || 'Invalid code. Please try again.');
     } finally { setBusy(false); }
