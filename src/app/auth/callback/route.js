@@ -11,11 +11,23 @@ export async function GET(request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       const meta = data.user?.user_metadata;
-      if (meta?.role === 'professional') {
+      const role = meta?.role;
+
+      // If Google sign in and no role set yet — set as homeowner
+      if (!role) {
+        await supabase.auth.updateUser({
+          data: { role: 'homeowner' }
+        });
+        return NextResponse.redirect(`${origin}/dashboard`);
+      }
+
+      if (role === 'professional') {
         return NextResponse.redirect(`${origin}/pro-dashboard`);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+
+      return NextResponse.redirect(`${origin}${next === '/' ? '/dashboard' : next}`);
     }
   }
+
   return NextResponse.redirect(`${origin}/auth?error=oauth`);
 }

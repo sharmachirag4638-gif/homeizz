@@ -1,6 +1,6 @@
 import './globals.css';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://homeizz.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.homeizz.in';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

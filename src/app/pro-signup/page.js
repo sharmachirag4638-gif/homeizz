@@ -150,7 +150,7 @@ export default function ProSignup(){
       }},
     });
     if(error) throw error;
-    router.push('/pro-dashboard');
+    router.push(`/verify?email=${encodeURIComponent(email)}&role=professional`);
   }
 
   async function submit(){
