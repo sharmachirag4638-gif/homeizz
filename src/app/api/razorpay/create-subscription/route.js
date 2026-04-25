@@ -24,7 +24,6 @@ export async function POST(request) {
       return Response.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-    // Create Razorpay plan
     const razorpayPlan = await razorpay.plans.create({
       period: planDetails.period,
       interval: planDetails.interval,
@@ -35,13 +34,11 @@ export async function POST(request) {
       },
     });
 
-    // Create subscription with 3 month trial
     const subscription = await razorpay.subscriptions.create({
       plan_id: razorpayPlan.id,
       total_count: billing === 'annual' ? 12 : 36,
-      start_at: Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60), // 90 days from now
+      start_at: Math.floor(Date.now() / 1000) + (90 * 24 * 60 * 60),
       customer_notify: 1,
-      addons: [],
       notes: { name, email, phone, plan, billing },
     });
 

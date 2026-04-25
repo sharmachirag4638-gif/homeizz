@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 
@@ -23,12 +23,12 @@ export default function ListingDetailClient({ listing, professional }) {
   const [enquiryMessage, setEnquiryMessage] = useState('');
   const [enquiryProjectType, setEnquiryProjectType] = useState('');
 
-  useState(() => {
+  useEffect(() => {
     sb.auth.getUser().then(({ data }) => {
       setUser(data.user || null);
       setChecked(true);
     });
-  });
+  }, []);
 
   const allPhotos = [listing.cover_image, ...(Array.isArray(listing.photos) ? listing.photos : [])].filter(Boolean);
 
@@ -46,7 +46,7 @@ export default function ListingDetailClient({ listing, professional }) {
     try {
       const { error: dbErr } = await sb.from('enquiries').insert({
         listing_id: listing.id,
-        professional_id: listing.owner_id,
+        professional_id: listing.owner_id || listing.user_id,
         homeowner_id: user?.id || null,
         homeowner_name: enquiryName,
         homeowner_phone: enquiryPhone,
@@ -101,6 +101,7 @@ export default function ListingDetailClient({ listing, professional }) {
 
   return (
     <div style={{background:'var(--c)',minHeight:'100vh',paddingTop:64}}>
+
       {/* Photo Gallery */}
       <div style={{background:'#000',position:'relative'}}>
         <div style={{maxWidth:1100,margin:'0 auto',padding:'0 44px',display:'grid',gridTemplateColumns:allPhotos.length>1?'1fr 280px':'1fr',gap:4,height:460}}>
@@ -127,10 +128,11 @@ export default function ListingDetailClient({ listing, professional }) {
 
       {/* Content */}
       <div style={{maxWidth:1100,margin:'0 auto',padding:'32px 44px 72px',display:'grid',gridTemplateColumns:'1fr 360px',gap:32}}>
+
         {/* Left */}
         <div>
           <div style={{fontSize:'.78rem',color:'var(--tlt)',marginBottom:16,display:'flex',alignItems:'center',gap:6}}>
-            <a href="/browse" style={{color:'var(--t)',textDecoration:'none'}}>Browse</a>
+            <a href="/browse" style={{color:'var(--t)'}}>Browse</a>
             <span>›</span><span>{listing.city}</span><span>›</span><span>{listing.listing_type}</span>
           </div>
           <h1 style={{fontFamily:'var(--fd)',fontSize:'clamp(1.6rem,3vw,2.2rem)',color:'var(--b)',marginBottom:12,lineHeight:1.2}}>{listing.title}</h1>
@@ -162,7 +164,7 @@ export default function ListingDetailClient({ listing, professional }) {
                 </div>
                 <div>
                   <div style={{fontWeight:700,color:'var(--b)',fontSize:'.95rem'}}>{professional.full_name}</div>
-                  <div style={{fontSize:'.78rem',color:'var(--tlt)'}}>{professional.role} · {professional.city}</div>
+                  <div style={{fontSize:'.78rem',color:'var(--tlt)'}}>{professional.pro_type||'Professional'} · {professional.primary_city||listing.city}</div>
                 </div>
               </div>
               {professional.bio&&<p style={{color:'var(--tm)',fontSize:'.88rem',lineHeight:1.75}}>{professional.bio}</p>}
