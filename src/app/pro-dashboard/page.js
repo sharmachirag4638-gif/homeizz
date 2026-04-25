@@ -33,12 +33,13 @@ export default function ProDashboard(){
       if(!data.user){router.push('/auth');return;}
       if(data.user.user_metadata?.role!=='professional'){router.push('/');return;}
       setUser(data.user);
-      const [{data:l},{data:e}] = await Promise.all([
+      // Fetch listings and enquiries in parallel
+      const [listingsRes, enquiriesRes] = await Promise.all([
         sb.from('listings').select('*').eq('owner_id',data.user.id).order('created_at',{ascending:false}),
         sb.from('enquiries').select('*').eq('professional_id',data.user.id).order('created_at',{ascending:false}),
       ]);
-      setListings(l||[]);
-      setEnquiries(e||[]);
+      setListings(listingsRes.data||[]);
+      setEnquiries(enquiriesRes.data||[]);
       setLoading(false);
     });
   },[]);
@@ -75,7 +76,6 @@ export default function ProDashboard(){
 
       {/* Sidebar */}
       <aside style={{width:260,minHeight:'100vh',background:'var(--b)',position:'fixed',left:0,top:0,bottom:0,zIndex:500,display:'flex',flexDirection:'column'}}>
-        {/* Logo */}
         <div style={{padding:'22px 24px 18px',borderBottom:'1px solid rgba(255,255,255,.07)'}}>
           <div style={{fontFamily:'var(--fd)',fontSize:'1.5rem',fontWeight:700,color:'var(--t)',cursor:'pointer'}} onClick={()=>router.push('/')}>
             Home<span style={{color:'var(--sandl)'}}>izz</span>
@@ -83,7 +83,6 @@ export default function ProDashboard(){
           <div style={{fontSize:'.65rem',color:'rgba(255,255,255,.25)',marginTop:2,letterSpacing:'.5px'}}>PROFESSIONAL DASHBOARD</div>
         </div>
 
-        {/* User */}
         <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,.07)',display:'flex',alignItems:'center',gap:12}}>
           <div style={{width:42,height:42,borderRadius:'50%',background:'linear-gradient(135deg,var(--t),var(--bm))',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,color:'#fff',fontSize:'.9rem',flexShrink:0}}>{initials}</div>
           <div style={{overflow:'hidden',flex:1}}>
@@ -92,7 +91,6 @@ export default function ProDashboard(){
           </div>
         </div>
 
-        {/* Trial banner */}
         {isTrialActive&&(
           <div style={{margin:'12px 16px',background:'rgba(107,127,94,.2)',border:'1px solid rgba(107,127,94,.35)',borderRadius:10,padding:'10px 14px'}}>
             <div style={{color:'#A8C89A',fontSize:'.7rem',fontWeight:700,marginBottom:3}}>🎉 FREE TRIAL</div>
@@ -103,7 +101,6 @@ export default function ProDashboard(){
           </div>
         )}
 
-        {/* Nav */}
         <nav style={{padding:'8px 0',flex:1,overflowY:'auto'}}>
           <div style={{fontSize:'.58rem',fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:'rgba(255,255,255,.18)',padding:'14px 24px 6px'}}>MENU</div>
           {NAV.map(n=>(
@@ -117,7 +114,6 @@ export default function ProDashboard(){
           ))}
         </nav>
 
-        {/* Bottom */}
         <div style={{padding:'16px 24px',borderTop:'1px solid rgba(255,255,255,.07)',display:'flex',flexDirection:'column',gap:10}}>
           <div onClick={()=>router.push('/')} style={{display:'flex',alignItems:'center',gap:10,color:'rgba(255,255,255,.35)',cursor:'pointer',fontSize:'.82rem'}}>
             <span>🌐</span> View Website
@@ -130,8 +126,6 @@ export default function ProDashboard(){
 
       {/* Main */}
       <main style={{marginLeft:260,flex:1,padding:'32px 36px',minHeight:'100vh'}}>
-
-        {/* Header */}
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:32}}>
           <div>
             <h1 style={{fontFamily:'var(--fd)',fontSize:'1.8rem',color:'var(--b)',marginBottom:4}}>
@@ -144,7 +138,7 @@ export default function ProDashboard(){
             <p style={{color:'var(--tlt)',fontSize:'.85rem'}}>
               {tab==='overview'&&"Here's your dashboard overview"}
               {tab==='listings'&&`${listings.length} of ${currentPlan.listings} listings used`}
-              {tab==='enquiries'&&`${enquiries.length} total enquiries`}
+              {tab==='enquiries'&&`${enquiries.length} total · ${newEnquiries} new`}
               {tab==='profile'&&'Manage your professional profile'}
               {tab==='subscription'&&'Manage your plan and billing'}
             </p>
@@ -159,13 +153,12 @@ export default function ProDashboard(){
         {/* OVERVIEW */}
         {tab==='overview'&&(
           <div>
-            {/* Stats grid */}
             <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:24}}>
               {[
                 {label:'Total Listings',value:listings.length,icon:'🖼️',color:'#C4622D',sub:`of ${currentPlan.listings} allowed`},
                 {label:'New Enquiries',value:newEnquiries,icon:'💬',color:'#6B7F5E',sub:'unread'},
                 {label:'Total Enquiries',value:enquiries.length,icon:'📨',color:'#B8860B',sub:'all time'},
-                {label:'Profile Views',value:'—',icon:'👁️',color:'#2D7D6B',sub:'coming soon'},
+                {label:'Trial Days Left',value:isTrialActive?daysLeft:'—',icon:'⏳',color:'#2D7D6B',sub:isTrialActive?'days free':'subscription active'},
               ].map(stat=>(
                 <div key={stat.label} style={{background:'#fff',borderRadius:16,padding:'20px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
@@ -178,9 +171,7 @@ export default function ProDashboard(){
               ))}
             </div>
 
-            {/* Plan + Quick actions */}
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:24}}>
-              {/* Plan card */}
               <div style={{background:'#fff',borderRadius:16,padding:'24px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
                   <h3 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Your Plan</h3>
@@ -206,17 +197,16 @@ export default function ProDashboard(){
                 </button>
               </div>
 
-              {/* Quick actions */}
               <div style={{background:'#fff',borderRadius:16,padding:'24px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
                 <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:16}}>Quick Actions</h3>
                 <div style={{display:'flex',flexDirection:'column',gap:10}}>
                   {[
-                    {icon:'➕',label:'Add a new listing',action:()=>router.push('/pro-dashboard/add-listing'),color:'var(--t)'},
-                    {icon:'💬',label:'View enquiries',action:()=>setTab('enquiries'),color:'#6B7F5E'},
-                    {icon:'👤',label:'Update profile',action:()=>setTab('profile'),color:'#B8860B'},
-                    {icon:'🌐',label:'View public profile',action:()=>router.push('/'),color:'#2D7D6B'},
+                    {icon:'➕',label:'Add a new listing',action:()=>router.push('/pro-dashboard/add-listing')},
+                    {icon:'💬',label:'View enquiries',action:()=>setTab('enquiries')},
+                    {icon:'👤',label:'Update profile',action:()=>setTab('profile')},
+                    {icon:'🌐',label:'View website',action:()=>router.push('/')},
                   ].map(a=>(
-                    <div key={a.label} onClick={a.action} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',border:'1.5px solid var(--borderl)',borderRadius:10,cursor:'pointer',background:'var(--c)',transition:'all .2s'}}>
+                    <div key={a.label} onClick={a.action} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',border:'1.5px solid var(--borderl)',borderRadius:10,cursor:'pointer',background:'var(--c)'}}>
                       <span style={{fontSize:'1.1rem'}}>{a.icon}</span>
                       <span style={{fontSize:'.85rem',fontWeight:500,color:'var(--b)'}}>{a.label}</span>
                       <span style={{marginLeft:'auto',color:'var(--tlt)'}}>→</span>
@@ -226,7 +216,6 @@ export default function ProDashboard(){
               </div>
             </div>
 
-            {/* Recent enquiries */}
             {enquiries.length>0&&(
               <div style={{background:'#fff',borderRadius:16,padding:'24px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
@@ -249,7 +238,6 @@ export default function ProDashboard(){
               </div>
             )}
 
-            {/* Empty state */}
             {listings.length===0&&(
               <div style={{background:'#fff',borderRadius:16,padding:'48px',border:'2px dashed var(--borderl)',textAlign:'center',marginTop:24}}>
                 <div style={{fontSize:'3rem',marginBottom:16}}>🖼️</div>
@@ -317,7 +305,7 @@ export default function ProDashboard(){
               <div style={{background:'#fff',borderRadius:16,padding:'60px',border:'2px dashed var(--borderl)',textAlign:'center'}}>
                 <div style={{fontSize:'3rem',marginBottom:16}}>💬</div>
                 <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:8}}>No enquiries yet</h3>
-                <p style={{color:'var(--tlt)',fontSize:'.88rem',marginBottom:20}}>Add listings to start receiving enquiries from homeowners</p>
+                <p style={{color:'var(--tlt)',fontSize:'.88rem',marginBottom:20}}>Add listings to start receiving enquiries</p>
                 <button onClick={()=>setTab('listings')} style={{padding:'12px 28px',background:'var(--t)',color:'#fff',border:'none',borderRadius:50,fontWeight:700,cursor:'pointer',fontSize:'.9rem'}}>
                   Manage Listings →
                 </button>
@@ -409,17 +397,17 @@ export default function ProDashboard(){
                 {id:'growth',name:'Growth',price:'₹1,499',annual:'₹14,990',listings:10,visibility:'150 days',color:'#C4622D',popular:true},
                 {id:'pro',name:'Pro',price:'₹3,999',annual:'₹39,990',listings:25,visibility:'6 months',color:'#B8860B'},
               ].map(p=>(
-                <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${plan===p.id?p.color:'var(--borderl)'}`,boxShadow:plan===p.id?`0 8px 24px ${p.color}25`:'var(--sh)',position:'relative'}}>
+                <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${plan===p.id?p.color:'var(--borderl)'}`,position:'relative'}}>
                   {p.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:p.color,color:'#fff',fontSize:'.68rem',fontWeight:700,padding:'3px 12px',borderRadius:50}}>MOST POPULAR</div>}
                   {plan===p.id&&<div style={{position:'absolute',top:14,right:14,background:p.color,color:'#fff',fontSize:'.65rem',fontWeight:700,padding:'2px 8px',borderRadius:50}}>YOUR PLAN</div>}
                   <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:4}}>{p.name}</h3>
                   <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:p.color}}>{p.price}<span style={{fontSize:'.9rem',fontWeight:400,color:'var(--tlt)'}}>/mo</span></div>
-                  <div style={{fontSize:'.75rem',color:'var(--tlt)',marginBottom:16}}>{p.annual}/year (save 2 months)</div>
+                  <div style={{fontSize:'.75rem',color:'var(--tlt)',marginBottom:16}}>{p.annual}/year</div>
                   <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:20}}>
                     <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ {p.listings} listings</div>
                     <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ Visible for {p.visibility}</div>
-                    <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ WhatsApp enquiries</div>
                     <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ Email notifications</div>
+                    <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ Enquiry dashboard</div>
                   </div>
                   <button style={{width:'100%',padding:'11px',border:`2px solid ${p.color}`,borderRadius:10,background:plan===p.id?p.color:'transparent',color:plan===p.id?'#fff':p.color,fontWeight:700,cursor:'pointer',fontSize:'.85rem'}}>
                     {plan===p.id?(isTrialActive?'Current Plan (Trial)':'Current Plan'):'Switch Plan'}
