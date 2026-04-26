@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+﻿import { notFound } from 'next/navigation';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import { createServer } from '@/lib/supabase-server';
@@ -24,9 +24,7 @@ export default async function ListingDetailPage({ params }) {
   const sb = createServer();
   const { data: listing } = await sb.from('listings').select('*').eq('id', params.id).single();
   if (!listing) notFound();
-
   const { data: professional } = await sb.from('profiles').select('*').eq('id', listing.owner_id).single();
-
   const productJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -41,7 +39,6 @@ export default async function ListingDetailPage({ params }) {
       availability: 'https://schema.org/InStock',
     } : undefined,
   };
-
   return (
     <>
       <Nav />
