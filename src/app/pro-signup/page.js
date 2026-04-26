@@ -159,36 +159,7 @@ export default function ProSignup(){
   async function submit(){
     setBusy(true); setErr('');
     try {
-      const displayName = profileType==='individual'?name:companyName;
-      const subRes = await fetch('/api/razorpay/create-subscription',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({plan:selectedPlan,billing,name:displayName,email,phone}),
-      });
-      const subData = await subRes.json();
-      if(subData.error){
-        await createAccount(null);
-        return;
-      }
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        subscription_id: subData.subscription_id,
-        name: 'Homeizz',
-        description: selectedPlan + ' Plan - 3 months free',
-        image: 'https://www.homeizz.in/favicon.svg',
-        prefill:{name:displayName,email,contact:phone},
-        theme:{color:'#C4622D'},
-        handler: async function(response){
-          await createAccount(subData.subscription_id);
-        },
-        modal:{
-          ondismiss: async function(){
-            await createAccount(null);
-          }
-        }
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      await createAccount(null);
     } catch(e){
       setErr(e.message||'Something went wrong');
       setBusy(false);
