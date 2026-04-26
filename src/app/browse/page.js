@@ -3,6 +3,8 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import { createServer } from '@/lib/supabase-server';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Browse Home Designs & Architects | Homeizz',
   description: 'Browse verified architects, interior designers, and ready-to-build home plans across India.',
@@ -109,7 +111,7 @@ export default async function BrowsePage({ searchParams }) {
                 List your work on Homeizz and get discovered by thousands of homeowners across India.
               </p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <Link href="/pro-signup" style={{padding:'13px 28px',background:'var(--t)',color:'#fff',borderRadius:50,textDecoration:'none',fontWeight:700,fontSize:'.9rem',display:'inline-block',boxShadow:'0 6px 20px rgba(196,98,45,.3)'}}>
+                <Link href="/pro-signup" style={{padding:'13px 28px',background:'var(--t)',color:'#fff',borderRadius:50,textDecoration:'none',fontWeight:700,fontSize:'.9rem',display:'inline-block'}}>
                   List Your Work — Free Trial
                 </Link>
                 {(city||style||type)&&(
