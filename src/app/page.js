@@ -3,8 +3,8 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-  title: 'Homeizz — India\'s Home Design Marketplace',
-  description: 'Discover verified architects and interior designers across India. Compare portfolios, get quotes, and build with confidence.',
+  title: 'Homeizz — India Home Design Marketplace',
+  description: 'Discover verified architects and interior designers across India.',
 };
 
 const CITIES = [
@@ -17,9 +17,9 @@ const CITIES = [
 ];
 
 const CATEGORIES = [
-  { name: 'Architecture', icon: '🏛️', desc: 'Award-winning architects', href: '/architects', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
-  { name: 'Interior Design', icon: '🛋️', desc: 'Transform your spaces', href: '/interior-designer', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
-  { name: 'Home Plans', icon: '📐', desc: 'Ready-to-build designs', href: '/browse?type=plan', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
+  { name: 'Architecture', desc: 'Award-winning architects', href: '/architects', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
+  { name: 'Interior Design', desc: 'Transform your spaces', href: '/interior-designer', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
+  { name: 'Home Plans', desc: 'Ready-to-build designs', href: '/browse?type=plan', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
 ];
 
 const INSPIRATION = [
@@ -31,16 +31,10 @@ const INSPIRATION = [
   'https://images.unsplash.com/photo-1615529328331-f8917597711f?w=600&q=80',
 ];
 
-const BLOGS = [
-  { title: 'Top 10 Interior Designers in Mumbai 2026', city: 'Mumbai', time: '5 min read', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600&q=80', href: '/blog/top-interior-designers-mumbai' },
-  { title: 'Modern vs Minimalist: Which Style is Right for Your Home?', city: 'Design Guide', time: '7 min read', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80', href: '/blog/modern-vs-minimalist' },
-  { title: 'How Much Does Home Interior Design Cost in India 2026?', city: 'Cost Guide', time: '8 min read', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&q=80', href: '/blog/interior-design-cost-india' },
-];
-
 const STEPS = [
-  { n: '01', title: 'Browse & Discover', desc: 'Explore thousands of verified architects and designers across India. Filter by city, style, and budget.' },
-  { n: '02', title: 'Connect & Compare', desc: 'Sign up for free and send enquiries to multiple professionals. Compare their portfolios and quotes.' },
-  { n: '03', title: 'Build with Confidence', desc: 'Choose your designer and start your dream project. Track progress and pay securely through Homeizz.' },
+  { n: '01', title: 'Browse & Discover', desc: 'Explore thousands of verified architects and designers across India.' },
+  { n: '02', title: 'Connect & Compare', desc: 'Send enquiries to multiple professionals. Compare their portfolios and quotes.' },
+  { n: '03', title: 'Build with Confidence', desc: 'Choose your designer and start your dream project.' },
 ];
 
 export default function HomePage() {
@@ -53,7 +47,7 @@ export default function HomePage() {
           <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(0,0,0,.35) 0%,rgba(0,0,0,.15) 40%,rgba(0,0,0,.6) 100%)'}}/>
           <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'0 24px',zIndex:2}}>
             <h1 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'clamp(2.8rem,6vw,5.5rem)',lineHeight:1.05,marginBottom:20,fontWeight:600}}>
-              Your dream home,<br/><em style={{color:'var(--tl)',fontStyle:'italic'}}>designed by India's best.</em>
+              Your dream home, designed by India's best.
             </h1>
             <p style={{color:'rgba(255,255,255,.85)',fontSize:'clamp(1rem,2vw,1.2rem)',maxWidth:540,marginBottom:40,lineHeight:1.7}}>
               Discover verified architects and interior designers. Compare portfolios, get quotes, and build with confidence.
@@ -114,7 +108,7 @@ export default function HomePage() {
             <div style={{columns:'3 300px',gap:16}}>
               {INSPIRATION.map((img,i)=>(
                 <div key={i} style={{breakInside:'avoid',marginBottom:16,borderRadius:16,overflow:'hidden'}}>
-                  <img src={img} alt={`Inspiration ${i+1}`} style={{width:'100%',display:'block'}} loading="lazy" onError={e=>{e.target.style.display='none';e.target.parentElement.style.display='none';}}/>
+                  <img src={img} alt={`Inspiration ${i+1}`} style={{width:'100%',display:'block'}} loading="lazy"/>
                 </div>
               ))}
             </div>
