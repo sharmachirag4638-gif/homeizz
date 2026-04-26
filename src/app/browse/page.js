@@ -98,20 +98,26 @@ export default async function BrowsePage({ searchParams }) {
             )}
           </div>
 
-          <div style={{marginBottom:16,fontSize:'.85rem',color:'var(--tlt)'}}>
-            {listings.length} listing{listings.length!==1?'s':''} found
-          </div>
-
           {listings.length===0 ? (
             <div style={{textAlign:'center',padding:'80px 20px'}}>
-              <div style={{fontSize:'3rem',marginBottom:16}}>🔍</div>
-              <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:8}}>No listings found</h3>
-              <p style={{color:'var(--tlt)',fontSize:'.88rem',marginBottom:24}}>
-                Try removing some filters or check back soon — new designers join every week!
+              <div style={{fontSize:'4rem',marginBottom:20}}>🌟</div>
+              <h2 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:12}}>Be the first!</h2>
+              <p style={{color:'var(--tlt)',fontSize:'.95rem',marginBottom:8,maxWidth:440,margin:'0 auto 8px'}}>
+                No listings yet in this area. Are you an architect or interior designer?
               </p>
-              <Link href="/browse" style={{padding:'12px 28px',background:'var(--t)',color:'#fff',borderRadius:50,textDecoration:'none',fontWeight:700,fontSize:'.9rem',display:'inline-block'}}>
-                Clear filters
-              </Link>
+              <p style={{color:'var(--tlt)',fontSize:'.88rem',marginBottom:32,maxWidth:440,margin:'0 auto 32px'}}>
+                List your work on Homeizz and get discovered by thousands of homeowners across India.
+              </p>
+              <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                <Link href="/pro-signup" style={{padding:'13px 28px',background:'var(--t)',color:'#fff',borderRadius:50,textDecoration:'none',fontWeight:700,fontSize:'.9rem',display:'inline-block',boxShadow:'0 6px 20px rgba(196,98,45,.3)'}}>
+                  List Your Work — Free Trial
+                </Link>
+                {(city||style||type)&&(
+                  <Link href="/browse" style={{padding:'13px 28px',background:'transparent',color:'var(--t)',borderRadius:50,textDecoration:'none',fontWeight:600,fontSize:'.9rem',display:'inline-block',border:'1.5px solid var(--t)'}}>
+                    Clear filters
+                  </Link>
+                )}
+              </div>
             </div>
           ) : (
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:24}}>
