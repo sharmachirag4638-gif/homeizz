@@ -1,4 +1,4 @@
-import Razorpay from 'razorpay';
+﻿import Razorpay from 'razorpay';
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -19,11 +19,9 @@ export async function POST(request) {
     const { plan, billing, name, email, phone } = await request.json();
     const planKey = `${plan}_${billing}`;
     const planDetails = PLANS[planKey];
-
     if (!planDetails) {
       return Response.json({ error: 'Invalid plan' }, { status: 400 });
     }
-
     const razorpayPlan = await razorpay.plans.create({
       period: planDetails.period,
       interval: planDetails.interval,
@@ -33,7 +31,6 @@ export async function POST(request) {
         currency: 'INR',
       },
     });
-
     const subscription = await razorpay.subscriptions.create({
       plan_id: razorpayPlan.id,
       total_count: billing === 'annual' ? 12 : 36,
@@ -41,7 +38,6 @@ export async function POST(request) {
       customer_notify: 1,
       notes: { name, email, phone, plan, billing },
     });
-
     return Response.json({ subscription_id: subscription.id, plan: razorpayPlan });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
