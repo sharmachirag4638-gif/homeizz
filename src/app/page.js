@@ -3,7 +3,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-  title: 'Homeizz — India\'s Home Design Marketplace',
+  title: 'Homeizz � India\'s Home Design Marketplace',
   description: 'Discover verified architects and interior designers across India. Compare portfolios, get quotes, and build with confidence.',
 };
 
@@ -17,9 +17,9 @@ const CITIES = [
 ];
 
 const CATEGORIES = [
-  { name: 'Architecture', icon: '🏛️', desc: 'Award-winning architects', href: '/architects', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
-  { name: 'Interior Design', icon: '🛋️', desc: 'Transform your spaces', href: '/interior-designer', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
-  { name: 'Home Plans', icon: '📐', desc: 'Ready-to-build designs', href: '/browse?type=plan', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
+  { name: 'Architecture', icon: '???', desc: 'Award-winning architects', href: '/architects', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
+  { name: 'Interior Design', icon: '???', desc: 'Transform your spaces', href: '/interior-designer', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
+  { name: 'Home Plans', icon: '??', desc: 'Ready-to-build designs', href: '/browse?type=plan', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
 ];
 
 const INSPIRATION = [
@@ -55,7 +55,7 @@ export default function HomePage() {
           <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(0,0,0,.35) 0%,rgba(0,0,0,.15) 40%,rgba(0,0,0,.6) 100%)'}}/>
           <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'0 24px',zIndex:2}}>
             <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(255,255,255,.15)',backdropFilter:'blur(12px)',color:'#fff',fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',padding:'8px 20px',borderRadius:50,marginBottom:28,border:'1px solid rgba(255,255,255,.25)'}}>
-              🇮🇳 India's Home Design Marketplace
+              ???? India's Home Design Marketplace
             </div>
             <h1 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'clamp(2.8rem,6vw,5.5rem)',lineHeight:1.05,marginBottom:20,fontWeight:600,textShadow:'0 2px 20px rgba(0,0,0,.3)'}}>
               Your dream home,<br/><em style={{color:'var(--tl)',fontStyle:'italic'}}>designed by India's best.</em>
@@ -65,7 +65,7 @@ export default function HomePage() {
             </p>
             <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
               <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'1rem',textDecoration:'none',boxShadow:'0 8px 28px rgba(196,98,45,.5)'}}>
-                Browse Designs →
+                Browse Designs ?
               </Link>
               <Link href="/pro-signup" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'rgba(255,255,255,.15)',color:'#fff',borderRadius:50,fontWeight:600,fontSize:'1rem',textDecoration:'none',border:'1.5px solid rgba(255,255,255,.4)',backdropFilter:'blur(8px)'}}>
                 List Your Work
@@ -84,7 +84,7 @@ export default function HomePage() {
             <div style={{textAlign:'center',marginBottom:48}}>
               <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tlt)',marginBottom:12}}>What We Offer</div>
               <h2 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:12}}>Find the right professional</h2>
-              <p style={{color:'var(--tlt)',maxWidth:480,margin:'0 auto',fontSize:'.95rem'}}>From dream homes to commercial spaces — we connect you with India's finest design talent</p>
+              <p style={{color:'var(--tlt)',maxWidth:480,margin:'0 auto',fontSize:'.95rem'}}>From dream homes to commercial spaces � we connect you with India's finest design talent</p>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
               {CATEGORIES.map(cat=>(
@@ -96,7 +96,7 @@ export default function HomePage() {
                     <h3 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'1.5rem',marginBottom:4}}>{cat.name}</h3>
                     <p style={{color:'rgba(255,255,255,.7)',fontSize:'.82rem'}}>{cat.desc}</p>
                     <div style={{display:'inline-flex',alignItems:'center',gap:6,marginTop:12,background:'rgba(255,255,255,.15)',backdropFilter:'blur(8px)',color:'#fff',fontSize:'.75rem',fontWeight:600,padding:'6px 14px',borderRadius:50,border:'1px solid rgba(255,255,255,.25)'}}>
-                      Take a look →
+                      Take a look ?
                     </div>
                   </div>
                 </Link>
@@ -134,19 +134,13 @@ export default function HomePage() {
                 <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Beautiful spaces,<br/><em>curated for you</em></h2>
               </div>
               <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 24px',background:'transparent',color:'var(--t)',border:'1.5px solid var(--t)',borderRadius:50,fontWeight:600,fontSize:'.88rem',textDecoration:'none'}}>
-                View all →
+                View all ?
               </Link>
             </div>
             <div style={{columns:'3 300px',gap:16}}>
               {INSPIRATION.map((img,i)=>(
                 <div key={i} style={{breakInside:'avoid',marginBottom:16,borderRadius:16,overflow:'hidden'}}>
-                  <img
-                    src={img}
-                    alt={`Inspiration ${i+1}`}
-                    style={{width:'100%',display:'block'}}
-                    loading="lazy"
-                    onError={e=>{e.target.style.display='none';e.target.parentElement.style.display='none';}}
-                  />
+                  <img src={img} alt={`Inspiration ${i+1}`} style={{width:'100%',display:'block'}} loading="lazy" onError={e=>{e.target.style.display='none';e.target.parentElement.style.display='none';}}/>
                 </div>
               ))}
             </div>
@@ -167,7 +161,7 @@ export default function HomePage() {
                   <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 60%)'}}/>
                   <div style={{position:'absolute',bottom:16,left:20}}>
                     <div style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'1.4rem',fontWeight:600}}>{city.name}</div>
-                    <div style={{color:'rgba(255,255,255,.7)',fontSize:'.75rem'}}>View designers →</div>
+                    <div style={{color:'rgba(255,255,255,.7)',fontSize:'.75rem'}}>View designers ?</div>
                   </div>
                 </Link>
               ))}
@@ -182,7 +176,7 @@ export default function HomePage() {
             <p style={{color:'rgba(255,255,255,.55)',marginBottom:36,fontSize:'.95rem'}}>Join thousands of homeowners who found their perfect designer on Homeizz</p>
             <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>
               <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'1rem',textDecoration:'none',boxShadow:'0 8px 28px rgba(196,98,45,.4)'}}>
-                Browse Designers →
+                Browse Designers ?
               </Link>
               <Link href="/pro-signup" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'rgba(255,255,255,.08)',color:'#fff',borderRadius:50,fontWeight:600,fontSize:'1rem',textDecoration:'none',border:'1.5px solid rgba(255,255,255,.2)'}}>
                 List as Professional
