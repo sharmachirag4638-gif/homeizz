@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
@@ -23,9 +23,9 @@ const PROJECT_TYPES = [
 ];
 
 const PLANS = [
-  {id:'starter',name:'Starter',monthly:499,annual:4990,listings:3,visibility:'60 days',color:'#6B7F5E',popular:false},
-  {id:'growth',name:'Growth',monthly:1499,annual:14990,listings:10,visibility:'150 days',color:'#C4622D',popular:true},
-  {id:'pro',name:'Pro',monthly:3999,annual:39990,listings:25,visibility:'6 months',color:'#B8860B',popular:false},
+  {id:'starter',name:'Starter',monthly:499,annual:4990,annualMonthly:416,listings:3,visibility:'60 days',color:'#6B7F5E',popular:false},
+  {id:'growth',name:'Growth',monthly:1499,annual:14990,annualMonthly:1249,listings:10,visibility:'150 days',color:'#C4622D',popular:true},
+  {id:'pro',name:'Pro',monthly:3999,annual:39990,annualMonthly:3333,listings:25,visibility:'6 months',color:'#B8860B',popular:false},
 ];
 
 const STEPS = [
@@ -84,14 +84,15 @@ export default function ProSignup(){
   const [otherCities,setOtherCities] = useState([]);
   const [panIndia,setPanIndia] = useState(false);
   const [styles,setStyles] = useState([]);
+  const [otherStyle,setOtherStyle] = useState('');
   const [projectTypes,setProjectTypes] = useState([]);
+  const [otherProjectType,setOtherProjectType] = useState('');
   const [bio,setBio] = useState('');
   const [instagram,setInstagram] = useState('');
   const [website,setWebsite] = useState('');
   const [googleBusiness,setGoogleBusiness] = useState('');
   const [selectedPlan,setSelectedPlan] = useState('growth');
 
-  // Load Razorpay script
   useEffect(()=>{
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -118,14 +119,16 @@ export default function ProSignup(){
     if(step===3){if(!proType||!experience||!minBudget) return setErr('Please fill all required fields');}
     if(step===4){if(!primaryCity) return setErr('Please select your primary city');}
     if(step===5){
-      if(styles.length===0) return setErr('Select at least one style');
-      if(projectTypes.length===0) return setErr('Select at least one project type');
+      if(styles.length===0&&!otherStyle.trim()) return setErr('Select at least one style');
+      if(projectTypes.length===0&&!otherProjectType.trim()) return setErr('Select at least one project type');
     }
     setStep(s=>s+1);
   }
 
   async function createAccount(razorpaySubId){
     const displayName = profileType==='individual'?name:companyName;
+    const allStyles = otherStyle.trim() ? [...styles, otherStyle.trim()] : styles;
+    const allProjectTypes = otherProjectType.trim() ? [...projectTypes, otherProjectType.trim()] : projectTypes;
     const {error} = await sb.auth.signUp({
       email, password,
       options:{data:{
@@ -140,7 +143,7 @@ export default function ProSignup(){
         avg_completion_time:avgCompletionTime,
         min_budget:minBudget, primary_city:primaryCity,
         other_cities:otherCities, pan_india:panIndia,
-        styles, project_types:projectTypes,
+        styles:allStyles, project_types:allProjectTypes,
         bio, instagram, website,
         google_business:googleBusiness,
         plan:selectedPlan, billing,
@@ -157,27 +160,21 @@ export default function ProSignup(){
     setBusy(true); setErr('');
     try {
       const displayName = profileType==='individual'?name:companyName;
-
-      // Create Razorpay subscription
       const subRes = await fetch('/api/razorpay/create-subscription',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({plan:selectedPlan,billing,name:displayName,email,phone}),
       });
       const subData = await subRes.json();
-
       if(subData.error){
-        // If subscription fails, still create account (trial only)
         await createAccount(null);
         return;
       }
-
-      // Open Razorpay to save card
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         subscription_id: subData.subscription_id,
         name: 'Homeizz',
-        description: `${selectedPlan.charAt(0).toUpperCase()+selectedPlan.slice(1)} Plan — 3 months free`,
+        description: selectedPlan + ' Plan - 3 months free',
         image: 'https://www.homeizz.in/favicon.svg',
         prefill:{name:displayName,email,contact:phone},
         theme:{color:'#C4622D'},
@@ -186,12 +183,10 @@ export default function ProSignup(){
         },
         modal:{
           ondismiss: async function(){
-            // If they close Razorpay, still create account with trial
             await createAccount(null);
           }
         }
       };
-
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch(e){
@@ -208,7 +203,6 @@ export default function ProSignup(){
       </nav>
 
       <div style={{maxWidth:680,margin:'0 auto',padding:'40px 20px 80px'}}>
-        {/* Progress */}
         <div style={{marginBottom:40}}>
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
             {STEPS.map(s=>(
@@ -228,21 +222,19 @@ export default function ProSignup(){
         <div style={{background:'#fff',borderRadius:20,padding:'36px 40px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
           {err&&<div style={{background:'#FEF2F2',border:'1px solid #FECACA',color:'#DC2626',borderRadius:10,padding:'12px 16px',marginBottom:20,fontSize:'.875rem'}}>{err}</div>}
 
-          {/* STEP 1 */}
           {step===1&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Create your account</h2>
-              <p style={{marginBottom:28,fontSize:'.9rem'}}>Start your free 3-month trial — no credit card needed now</p>
+              <p style={{marginBottom:28,fontSize:'.9rem'}}>Start your free 3-month trial - no credit card needed now</p>
               <div style={{display:'flex',flexDirection:'column',gap:16}}>
                 <Field label="Email address" type="email" value={email} onChange={setEmail} placeholder="you@example.com"/>
-                <Field label="Phone number" type="tel" value={phone} onChange={setPhone} placeholder="9876543210"/>
+                <Field label="Phone number" type="tel" value={phone} onChange={setPhone} placeholder="Enter your phone number"/>
                 <Field label="Password" type="password" value={password} onChange={setPassword} placeholder="Min 8 characters"/>
                 <Field label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat password"/>
               </div>
             </div>
           )}
 
-          {/* STEP 2 */}
           {step===2&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Individual or Firm?</h2>
@@ -272,7 +264,6 @@ export default function ProSignup(){
             </div>
           )}
 
-          {/* STEP 3 */}
           {step===3&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Professional Details</h2>
@@ -291,12 +282,11 @@ export default function ProSignup(){
                 <SelectField label="Years of Experience *" value={experience} onChange={setExperience} options={['< 1 year','1-3 years','3-5 years','5-10 years','10-15 years','15+ years']}/>
                 <SelectField label="Projects Completed" value={projectsCompleted} onChange={setProjectsCompleted} options={['< 10','10-25','25-50','50-100','100-200','200+']}/>
                 <SelectField label="Average Project Duration" value={avgCompletionTime} onChange={setAvgCompletionTime} options={['< 1 month','1-3 months','3-6 months','6-12 months','1-2 years','2+ years']}/>
-                <SelectField label="Minimum Project Budget *" value={minBudget} onChange={setMinBudget} options={['₹1-5 Lakhs','₹5-10 Lakhs','₹10-25 Lakhs','₹25-50 Lakhs','₹50 Lakhs+']}/>
+                <SelectField label="Minimum Project Budget *" value={minBudget} onChange={setMinBudget} options={['Rs 1-5 Lakhs','Rs 5-10 Lakhs','Rs 10-25 Lakhs','Rs 25-50 Lakhs','Rs 50 Lakhs+']}/>
               </div>
             </div>
           )}
 
-          {/* STEP 4 */}
           {step===4&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Location & Coverage</h2>
@@ -326,7 +316,6 @@ export default function ProSignup(){
             </div>
           )}
 
-          {/* STEP 5 */}
           {step===5&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Your Specialities</h2>
@@ -341,6 +330,10 @@ export default function ProSignup(){
                       </div>
                     ))}
                   </div>
+                  <div style={{marginTop:12}}>
+                    <label style={{...labelStyle,fontWeight:400,color:'var(--tlt)'}}>Other style (optional)</label>
+                    <input value={otherStyle} onChange={e=>setOtherStyle(e.target.value)} placeholder="e.g. Japandi, Coastal, Wabi-Sabi..." style={inputStyle}/>
+                  </div>
                 </div>
                 <div>
                   <label style={labelStyle}>Project Types *</label>
@@ -351,12 +344,15 @@ export default function ProSignup(){
                       </div>
                     ))}
                   </div>
+                  <div style={{marginTop:12}}>
+                    <label style={{...labelStyle,fontWeight:400,color:'var(--tlt)'}}>Other project type (optional)</label>
+                    <input value={otherProjectType} onChange={e=>setOtherProjectType(e.target.value)} placeholder="e.g. Heritage restoration, Co-working..." style={inputStyle}/>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* STEP 6 */}
           {step===6&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Portfolio & Bio</h2>
@@ -373,11 +369,10 @@ export default function ProSignup(){
             </div>
           )}
 
-          {/* STEP 7 */}
           {step===7&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Choose Your Plan</h2>
-              <p style={{marginBottom:24,fontSize:'.9rem'}}>Start free for 3 months — save card now, charged later</p>
+              <p style={{marginBottom:24,fontSize:'.9rem'}}>Start free for 3 months - save card now, charged later</p>
               <div style={{background:'linear-gradient(135deg,#6B7F5E,#4A6040)',borderRadius:12,padding:'14px 20px',marginBottom:24,display:'flex',alignItems:'center',gap:12}}>
                 <span style={{fontSize:'1.5rem'}}>🎉</span>
                 <div>
@@ -385,43 +380,38 @@ export default function ProSignup(){
                   <div style={{color:'rgba(255,255,255,.8)',fontSize:'.78rem'}}>Save your card now. First charge after 90 days.</div>
                 </div>
               </div>
-              <div style={{display:'flex',background:'var(--borderl)',borderRadius:50,padding:4,marginBottom:24,width:'fit-content'}}>
-                {['monthly','annual'].map(b=>(
-                  <div key={b} onClick={()=>setBilling(b)} style={{padding:'8px 20px',borderRadius:50,cursor:'pointer',fontSize:'.85rem',fontWeight:600,background:billing===b?'#fff':'transparent',color:billing===b?'var(--t)':'var(--tlt)'}}>
-                    {b==='monthly'?'Monthly':'Annual (2 months free)'}
+              <div style={{marginBottom:16,fontSize:'.82rem',color:'var(--tlt)',fontWeight:600}}>Select your plan and billing cycle:</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:8}}>
+                <div style={{textAlign:'center',fontSize:'.75rem',fontWeight:700,color:'var(--tlt)',padding:'6px',background:'var(--borderl)',borderRadius:8}}>MONTHLY</div>
+                <div style={{textAlign:'center',fontSize:'.75rem',fontWeight:700,color:'#6B7F5E',padding:'6px',background:'#E8F0E4',borderRadius:8}}>ANNUAL (2 months free)</div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+                {PLANS.map(plan=>(
+                  <div key={`${plan.id}-monthly`} onClick={()=>{setSelectedPlan(plan.id);setBilling('monthly');}} style={{border:`2px solid ${selectedPlan===plan.id&&billing==='monthly'?plan.color:'var(--borderl)'}`,borderRadius:14,padding:'14px',cursor:'pointer',background:selectedPlan===plan.id&&billing==='monthly'?`${plan.color}15`:'#fff',position:'relative'}}>
+                    {plan.popular&&<div style={{position:'absolute',top:-9,left:'50%',transform:'translateX(-50%)',background:plan.color,color:'#fff',fontSize:'.6rem',fontWeight:700,padding:'2px 8px',borderRadius:50,whiteSpace:'nowrap'}}>POPULAR</div>}
+                    <div style={{fontWeight:700,color:'var(--b)',fontSize:'.85rem',marginBottom:2}}>{plan.name}</div>
+                    <div style={{fontWeight:800,color:plan.color,fontSize:'1rem'}}>Rs {plan.monthly.toLocaleString()}<span style={{fontSize:'.65rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span></div>
+                    <div style={{fontSize:'.68rem',color:'var(--tlt)',marginTop:3}}>{plan.listings} listings</div>
                   </div>
                 ))}
-              </div>
-              <div style={{display:'flex',flexDirection:'column',gap:14}}>
                 {PLANS.map(plan=>(
-                  <div key={plan.id} onClick={()=>setSelectedPlan(plan.id)} style={{border:`2px solid ${selectedPlan===plan.id?plan.color:'var(--borderl)'}`,borderRadius:16,padding:'18px 20px',cursor:'pointer',background:selectedPlan===plan.id?`${plan.color}15`:'#fff',position:'relative'}}>
-                    {plan.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:plan.color,color:'#fff',fontSize:'.7rem',fontWeight:700,padding:'3px 14px',borderRadius:50}}>MOST POPULAR</div>}
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                      <div>
-                        <div style={{fontWeight:700,color:'var(--b)',fontSize:'1rem',marginBottom:4}}>{plan.name}</div>
-                        <div style={{fontSize:'.8rem',color:'var(--tlt)'}}>{plan.listings} listings · Visible for {plan.visibility}</div>
-                      </div>
-                      <div style={{textAlign:'right'}}>
-                        <div style={{fontWeight:800,color:plan.color,fontSize:'1.3rem'}}>
-                          ₹{billing==='monthly'?plan.monthly.toLocaleString():Math.round(plan.annual/12).toLocaleString()}
-                          <span style={{fontSize:'.75rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span>
-                        </div>
-                        {billing==='annual'&&<div style={{fontSize:'.72rem',color:'#6B7F5E',fontWeight:600}}>₹{plan.annual.toLocaleString()}/year</div>}
-                      </div>
-                    </div>
+                  <div key={`${plan.id}-annual`} onClick={()=>{setSelectedPlan(plan.id);setBilling('annual');}} style={{border:`2px solid ${selectedPlan===plan.id&&billing==='annual'?plan.color:'var(--borderl)'}`,borderRadius:14,padding:'14px',cursor:'pointer',background:selectedPlan===plan.id&&billing==='annual'?`${plan.color}15`:'#fff',position:'relative'}}>
+                    <div style={{position:'absolute',top:-9,right:8,background:'#6B7F5E',color:'#fff',fontSize:'.55rem',fontWeight:700,padding:'2px 6px',borderRadius:50}}>SAVE</div>
+                    <div style={{fontWeight:700,color:'var(--b)',fontSize:'.85rem',marginBottom:2}}>{plan.name}</div>
+                    <div style={{fontWeight:800,color:plan.color,fontSize:'1rem'}}>Rs {plan.annualMonthly.toLocaleString()}<span style={{fontSize:'.65rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span></div>
+                    <div style={{fontSize:'.68rem',color:'#6B7F5E',fontWeight:600}}>Rs {plan.annual.toLocaleString()}/yr</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Buttons */}
           <div style={{display:'flex',gap:12,marginTop:32}}>
-            {step>1&&<button onClick={()=>setStep(s=>s-1)} style={{flex:1,padding:'14px',border:'2px solid var(--borderl)',borderRadius:12,background:'#fff',color:'var(--tm)',fontWeight:600,cursor:'pointer',fontSize:'.9rem'}}>← Back</button>}
+            {step>1&&<button onClick={()=>setStep(s=>s-1)} style={{flex:1,padding:'14px',border:'2px solid var(--borderl)',borderRadius:12,background:'#fff',color:'var(--tm)',fontWeight:600,cursor:'pointer',fontSize:'.9rem'}}>Back</button>}
             {step<7
-              ?<button onClick={nextStep} style={{flex:2,padding:'14px',border:'none',borderRadius:12,background:'var(--t)',color:'#fff',fontWeight:700,cursor:'pointer',fontSize:'.95rem',boxShadow:'0 6px 20px rgba(196,98,45,.3)'}}>Continue →</button>
+              ?<button onClick={nextStep} style={{flex:2,padding:'14px',border:'none',borderRadius:12,background:'var(--t)',color:'#fff',fontWeight:700,cursor:'pointer',fontSize:'.95rem',boxShadow:'0 6px 20px rgba(196,98,45,.3)'}}>Continue</button>
               :<button onClick={submit} disabled={busy} style={{flex:2,padding:'14px',border:'none',borderRadius:12,background:busy?'var(--borderl)':'var(--t)',color:'#fff',fontWeight:700,cursor:busy?'not-allowed':'pointer',fontSize:'.95rem'}}>
-                {busy?'Setting up...':'🎉 Start Free Trial'}
+                {busy?'Setting up...':'Start Free Trial'}
               </button>
             }
           </div>
