@@ -1,9 +1,9 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-  title: 'Homeizz � India\'s Home Design Marketplace',
+  title: 'Homeizz — India\'s Home Design Marketplace',
   description: 'Discover verified architects and interior designers across India. Compare portfolios, get quotes, and build with confidence.',
 };
 
@@ -17,9 +17,9 @@ const CITIES = [
 ];
 
 const CATEGORIES = [
-  { name: 'Architecture', icon: '???', desc: 'Award-winning architects', href: '/architects', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
-  { name: 'Interior Design', icon: '???', desc: 'Transform your spaces', href: '/interior-designer', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
-  { name: 'Home Plans', icon: '??', desc: 'Ready-to-build designs', href: '/browse?type=plan', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
+  { name: 'Architecture', icon: '🏛️', desc: 'Award-winning architects', href: '/architects', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
+  { name: 'Interior Design', icon: '🛋️', desc: 'Transform your spaces', href: '/interior-designer', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
+  { name: 'Home Plans', icon: '📐', desc: 'Ready-to-build designs', href: '/browse?type=plan', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
 ];
 
 const INSPIRATION = [
@@ -48,56 +48,40 @@ export default function HomePage() {
     <>
       <Nav />
       <main>
-
-        {/* HERO */}
         <section style={{height:'100vh',position:'relative',overflow:'hidden'}}>
           <img src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1800&q=90" alt="Luxury home" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}}/>
           <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(0,0,0,.35) 0%,rgba(0,0,0,.15) 40%,rgba(0,0,0,.6) 100%)'}}/>
           <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'0 24px',zIndex:2}}>
-            <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(255,255,255,.15)',backdropFilter:'blur(12px)',color:'#fff',fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',padding:'8px 20px',borderRadius:50,marginBottom:28,border:'1px solid rgba(255,255,255,.25)'}}>
-              ???? India's Home Design Marketplace
-            </div>
-            <h1 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'clamp(2.8rem,6vw,5.5rem)',lineHeight:1.05,marginBottom:20,fontWeight:600,textShadow:'0 2px 20px rgba(0,0,0,.3)'}}>
+            <h1 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'clamp(2.8rem,6vw,5.5rem)',lineHeight:1.05,marginBottom:20,fontWeight:600}}>
               Your dream home,<br/><em style={{color:'var(--tl)',fontStyle:'italic'}}>designed by India's best.</em>
             </h1>
             <p style={{color:'rgba(255,255,255,.85)',fontSize:'clamp(1rem,2vw,1.2rem)',maxWidth:540,marginBottom:40,lineHeight:1.7}}>
               Discover verified architects and interior designers. Compare portfolios, get quotes, and build with confidence.
             </p>
             <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
-              <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'1rem',textDecoration:'none',boxShadow:'0 8px 28px rgba(196,98,45,.5)'}}>
-                Browse Designs ?
+              <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'1rem',textDecoration:'none'}}>
+                Browse Designs
               </Link>
-              <Link href="/pro-signup" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'rgba(255,255,255,.15)',color:'#fff',borderRadius:50,fontWeight:600,fontSize:'1rem',textDecoration:'none',border:'1.5px solid rgba(255,255,255,.4)',backdropFilter:'blur(8px)'}}>
+              <Link href="/pro-signup" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'rgba(255,255,255,.15)',color:'#fff',borderRadius:50,fontWeight:600,fontSize:'1rem',textDecoration:'none',border:'1.5px solid rgba(255,255,255,.4)'}}>
                 List Your Work
               </Link>
             </div>
           </div>
-          <div style={{position:'absolute',bottom:32,left:'50%',transform:'translateX(-50%)',display:'flex',flexDirection:'column',alignItems:'center',gap:8,color:'rgba(255,255,255,.6)',fontSize:'.75rem',letterSpacing:'1px',textTransform:'uppercase'}}>
-            <div style={{width:1,height:40,background:'rgba(255,255,255,.4)'}}/>
-            Scroll
-          </div>
         </section>
 
-        {/* CATEGORIES */}
         <section style={{padding:'80px 44px',background:'var(--c)'}}>
           <div style={{maxWidth:1100,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:48}}>
-              <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tlt)',marginBottom:12}}>What We Offer</div>
               <h2 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:12}}>Find the right professional</h2>
-              <p style={{color:'var(--tlt)',maxWidth:480,margin:'0 auto',fontSize:'.95rem'}}>From dream homes to commercial spaces � we connect you with India's finest design talent</p>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
               {CATEGORIES.map(cat=>(
-                <Link key={cat.name} href={cat.href} style={{textDecoration:'none',display:'block',borderRadius:20,overflow:'hidden',position:'relative',height:320,cursor:'pointer'}}>
+                <Link key={cat.name} href={cat.href} style={{textDecoration:'none',display:'block',borderRadius:20,overflow:'hidden',position:'relative',height:320}}>
                   <img src={cat.img} alt={cat.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                   <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.1) 60%)'}}/>
                   <div style={{position:'absolute',bottom:24,left:24,right:24}}>
-                    <div style={{fontSize:'1.8rem',marginBottom:8}}>{cat.icon}</div>
                     <h3 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'1.5rem',marginBottom:4}}>{cat.name}</h3>
                     <p style={{color:'rgba(255,255,255,.7)',fontSize:'.82rem'}}>{cat.desc}</p>
-                    <div style={{display:'inline-flex',alignItems:'center',gap:6,marginTop:12,background:'rgba(255,255,255,.15)',backdropFilter:'blur(8px)',color:'#fff',fontSize:'.75rem',fontWeight:600,padding:'6px 14px',borderRadius:50,border:'1px solid rgba(255,255,255,.25)'}}>
-                      Take a look ?
-                    </div>
                   </div>
                 </Link>
               ))}
@@ -105,13 +89,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* HOW IT WORKS */}
         <section style={{padding:'80px 44px',background:'var(--b)'}}>
           <div style={{maxWidth:1100,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:56}}>
-              <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tl)',marginBottom:12}}>Simple Process</div>
               <h2 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:12}}>How Homeizz works</h2>
-              <p style={{color:'rgba(255,255,255,.55)',maxWidth:440,margin:'0 auto',fontSize:'.95rem'}}>From discovery to your dream home in 3 simple steps</p>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:32}}>
               {STEPS.map((step,i)=>(
@@ -125,17 +106,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* GET INSPIRED */}
         <section style={{padding:'80px 44px',background:'var(--c)'}}>
           <div style={{maxWidth:1100,margin:'0 auto'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:40}}>
-              <div>
-                <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tlt)',marginBottom:12}}>Get Inspired</div>
-                <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Beautiful spaces,<br/><em>curated for you</em></h2>
-              </div>
-              <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 24px',background:'transparent',color:'var(--t)',border:'1.5px solid var(--t)',borderRadius:50,fontWeight:600,fontSize:'.88rem',textDecoration:'none'}}>
-                View all ?
-              </Link>
+            <div style={{marginBottom:40}}>
+              <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Beautiful spaces, curated for you</h2>
             </div>
             <div style={{columns:'3 300px',gap:16}}>
               {INSPIRATION.map((img,i)=>(
@@ -147,21 +121,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CITIES */}
         <section style={{padding:'80px 44px',background:'#fff'}}>
           <div style={{maxWidth:1100,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:48}}>
-              <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tlt)',marginBottom:12}}>Browse by City</div>
               <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Find designers near you</h2>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
               {CITIES.map(city=>(
-                <Link key={city.name} href={`/browse?city=${city.name}`} style={{textDecoration:'none',display:'block',borderRadius:16,overflow:'hidden',position:'relative',height:200,cursor:'pointer'}}>
+                <Link key={city.name} href={`/browse?city=${city.name}`} style={{textDecoration:'none',display:'block',borderRadius:16,overflow:'hidden',position:'relative',height:200}}>
                   <img src={city.img} alt={city.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                   <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 60%)'}}/>
                   <div style={{position:'absolute',bottom:16,left:20}}>
                     <div style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'1.4rem',fontWeight:600}}>{city.name}</div>
-                    <div style={{color:'rgba(255,255,255,.7)',fontSize:'.75rem'}}>View designers ?</div>
                   </div>
                 </Link>
               ))}
@@ -169,14 +140,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA */}
         <section style={{padding:'80px 44px',background:'var(--b)',textAlign:'center'}}>
           <div style={{maxWidth:600,margin:'0 auto'}}>
-            <h2 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:16}}>Ready to build your<br/><em style={{color:'var(--tl)'}}>dream home?</em></h2>
-            <p style={{color:'rgba(255,255,255,.55)',marginBottom:36,fontSize:'.95rem'}}>Join thousands of homeowners who found their perfect designer on Homeizz</p>
+            <h2 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:16}}>Ready to build your dream home?</h2>
             <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>
-              <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'1rem',textDecoration:'none',boxShadow:'0 8px 28px rgba(196,98,45,.4)'}}>
-                Browse Designers ?
+              <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'1rem',textDecoration:'none'}}>
+                Browse Designers
               </Link>
               <Link href="/pro-signup" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'15px 32px',background:'rgba(255,255,255,.08)',color:'#fff',borderRadius:50,fontWeight:600,fontSize:'1rem',textDecoration:'none',border:'1.5px solid rgba(255,255,255,.2)'}}>
                 List as Professional
