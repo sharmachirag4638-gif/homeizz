@@ -93,13 +93,6 @@ export default function ProSignup(){
   const [googleBusiness,setGoogleBusiness] = useState('');
   const [selectedPlan,setSelectedPlan] = useState('growth');
 
-  useEffect(()=>{
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    document.body.appendChild(script);
-    return ()=>{ document.body.removeChild(script); };
-  },[]);
-
   function toggleOtherCity(city){setOtherCities(prev=>prev.includes(city)?prev.filter(c=>c!==city):[...prev,city]);}
   function toggleStyle(s){setStyles(prev=>prev.includes(s)?prev.filter(x=>x!==s):[...prev,s]);}
   function toggleProjectType(t){setProjectTypes(prev=>prev.includes(t)?prev.filter(x=>x!==t):[...prev,t]);}
@@ -113,7 +106,7 @@ export default function ProSignup(){
     }
     if(step===2){
       if(!profileType) return setErr('Please select Individual or Firm');
-      if(profileType==='individual'&&(!name||!pan)) return setErr('Please fill all fields');
+      if(profileType==='individual'&&!name) return setErr('Please enter your full name');
       if(profileType==='firm'&&(!companyName||!gst||!contactPerson)) return setErr('Please fill all fields');
     }
     if(step===3){if(!proType||!experience||!minBudget) return setErr('Please fill all required fields');}
@@ -125,11 +118,11 @@ export default function ProSignup(){
     setStep(s=>s+1);
   }
 
-  async function createAccount(razorpaySubId){
+  async function createAccount(){
     const displayName = profileType==='individual'?name:companyName;
     const allStyles = otherStyle.trim() ? [...styles, otherStyle.trim()] : styles;
     const allProjectTypes = otherProjectType.trim() ? [...projectTypes, otherProjectType.trim()] : projectTypes;
-    const {error} = await sb.auth.signUp({
+    const {data, error} = await sb.auth.signUp({
       email, password,
       options:{data:{
         full_name:displayName, phone, role:'professional',
@@ -147,19 +140,21 @@ export default function ProSignup(){
         bio, instagram, website,
         google_business:googleBusiness,
         plan:selectedPlan, billing,
-        razorpay_subscription_id:razorpaySubId||null,
         trial_start:new Date().toISOString(),
         trial_end:new Date(Date.now()+90*24*60*60*1000).toISOString(),
       }},
     });
     if(error) throw error;
+    if(data?.user?.identities?.length === 0){
+      throw new Error('An account with this email already exists. Please sign in instead.');
+    }
     router.push(`/verify?email=${encodeURIComponent(email)}&role=professional`);
   }
 
   async function submit(){
     setBusy(true); setErr('');
     try {
-      await createAccount(null);
+      await createAccount();
     } catch(e){
       setErr(e.message||'Something went wrong');
       setBusy(false);
@@ -222,7 +217,6 @@ export default function ProSignup(){
               {profileType==='individual'&&(
                 <div style={{display:'flex',flexDirection:'column',gap:16}}>
                   <Field label="Full Name" value={name} onChange={setName} placeholder="Your full name"/>
-                  <Field label="PAN Card Number" value={pan} onChange={setPan} placeholder="ABCDE1234F"/>
                 </div>
               )}
               {profileType==='firm'&&(
@@ -343,34 +337,27 @@ export default function ProSignup(){
           {step===7&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Choose Your Plan</h2>
-              <p style={{marginBottom:24,fontSize:'.9rem'}}>Start free for 3 months - save card now, charged later</p>
+              <p style={{marginBottom:24,fontSize:'.9rem'}}>Start free for 3 months - no card needed now</p>
               <div style={{background:'linear-gradient(135deg,#6B7F5E,#4A6040)',borderRadius:12,padding:'14px 20px',marginBottom:24,display:'flex',alignItems:'center',gap:12}}>
                 <span style={{fontSize:'1.5rem'}}>🎉</span>
                 <div>
                   <div style={{color:'#fff',fontWeight:700,fontSize:'.9rem'}}>3 Months FREE Trial</div>
-                  <div style={{color:'rgba(255,255,255,.8)',fontSize:'.78rem'}}>Save your card now. First charge after 90 days.</div>
+                  <div style={{color:'rgba(255,255,255,.8)',fontSize:'.78rem'}}>No credit card needed. First charge after 90 days.</div>
                 </div>
               </div>
-              <div style={{marginBottom:16,fontSize:'.82rem',color:'var(--tlt)',fontWeight:600}}>Select your plan and billing cycle:</div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:8}}>
-                <div style={{textAlign:'center',fontSize:'.75rem',fontWeight:700,color:'var(--tlt)',padding:'6px',background:'var(--borderl)',borderRadius:8}}>MONTHLY</div>
-                <div style={{textAlign:'center',fontSize:'.75rem',fontWeight:700,color:'#6B7F5E',padding:'6px',background:'#E8F0E4',borderRadius:8}}>ANNUAL (2 months free)</div>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+              <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {PLANS.map(plan=>(
-                  <div key={`${plan.id}-monthly`} onClick={()=>{setSelectedPlan(plan.id);setBilling('monthly');}} style={{border:`2px solid ${selectedPlan===plan.id&&billing==='monthly'?plan.color:'var(--borderl)'}`,borderRadius:14,padding:'14px',cursor:'pointer',background:selectedPlan===plan.id&&billing==='monthly'?`${plan.color}15`:'#fff',position:'relative'}}>
-                    {plan.popular&&<div style={{position:'absolute',top:-9,left:'50%',transform:'translateX(-50%)',background:plan.color,color:'#fff',fontSize:'.6rem',fontWeight:700,padding:'2px 8px',borderRadius:50,whiteSpace:'nowrap'}}>POPULAR</div>}
-                    <div style={{fontWeight:700,color:'var(--b)',fontSize:'.85rem',marginBottom:2}}>{plan.name}</div>
-                    <div style={{fontWeight:800,color:plan.color,fontSize:'1rem'}}>Rs {plan.monthly.toLocaleString()}<span style={{fontSize:'.65rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span></div>
-                    <div style={{fontSize:'.68rem',color:'var(--tlt)',marginTop:3}}>{plan.listings} listings</div>
-                  </div>
-                ))}
-                {PLANS.map(plan=>(
-                  <div key={`${plan.id}-annual`} onClick={()=>{setSelectedPlan(plan.id);setBilling('annual');}} style={{border:`2px solid ${selectedPlan===plan.id&&billing==='annual'?plan.color:'var(--borderl)'}`,borderRadius:14,padding:'14px',cursor:'pointer',background:selectedPlan===plan.id&&billing==='annual'?`${plan.color}15`:'#fff',position:'relative'}}>
-                    <div style={{position:'absolute',top:-9,right:8,background:'#6B7F5E',color:'#fff',fontSize:'.55rem',fontWeight:700,padding:'2px 6px',borderRadius:50}}>SAVE</div>
-                    <div style={{fontWeight:700,color:'var(--b)',fontSize:'.85rem',marginBottom:2}}>{plan.name}</div>
-                    <div style={{fontWeight:800,color:plan.color,fontSize:'1rem'}}>Rs {plan.annualMonthly.toLocaleString()}<span style={{fontSize:'.65rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span></div>
-                    <div style={{fontSize:'.68rem',color:'#6B7F5E',fontWeight:600}}>Rs {plan.annual.toLocaleString()}/yr</div>
+                  <div key={plan.id} onClick={()=>setSelectedPlan(plan.id)} style={{border:`2px solid ${selectedPlan===plan.id?plan.color:'var(--borderl)'}`,borderRadius:16,padding:'18px 20px',cursor:'pointer',background:selectedPlan===plan.id?`${plan.color}15`:'#fff',position:'relative'}}>
+                    {plan.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:plan.color,color:'#fff',fontSize:'.7rem',fontWeight:700,padding:'3px 14px',borderRadius:50}}>MOST POPULAR</div>}
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                      <div>
+                        <div style={{fontWeight:700,color:'var(--b)',fontSize:'1rem',marginBottom:4}}>{plan.name}</div>
+                        <div style={{fontSize:'.8rem',color:'var(--tlt)'}}>{plan.listings} listings · Visible for {plan.visibility}</div>
+                      </div>
+                      <div style={{textAlign:'right'}}>
+                        <div style={{fontWeight:800,color:plan.color,fontSize:'1.3rem'}}>Rs {plan.monthly.toLocaleString()}<span style={{fontSize:'.75rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span></div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
