@@ -69,12 +69,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{padding:'80px 44px',background:'var(--c)'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
+        <section className="h-sec" style={{background:'var(--c)'}}>
+          <div className="h-cont">
             <div style={{textAlign:'center',marginBottom:48}}>
               <h2 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:12}}>Find the right professional</h2>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:20}}>
+            <div className="h-grid-3" style={{gap:20}}>
               {CATEGORIES.map(cat=>(
                 <Link key={cat.name} href={cat.href} style={{textDecoration:'none',display:'block',borderRadius:20,overflow:'hidden',position:'relative',height:320}}>
                   <img src={cat.img} alt={cat.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
@@ -89,12 +89,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{padding:'80px 44px',background:'var(--b)'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
+        <section className="h-sec" style={{background:'var(--b)'}}>
+          <div className="h-cont">
             <div style={{textAlign:'center',marginBottom:56}}>
               <h2 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:12}}>How Homeizz works</h2>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:32}}>
+            <div className="h-grid-3" style={{gap:32}}>
               {STEPS.map((step,i)=>(
                 <div key={i} style={{textAlign:'center',padding:'32px 24px',background:'rgba(255,255,255,.04)',borderRadius:20,border:'1px solid rgba(255,255,255,.08)'}}>
                   <div style={{fontFamily:'var(--fd)',fontSize:'3.5rem',color:'var(--t)',opacity:.4,lineHeight:1,marginBottom:16}}>{step.n}</div>
@@ -106,8 +106,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{padding:'80px 44px',background:'var(--c)'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
+        <section className="h-sec" style={{background:'var(--c)'}}>
+          <div className="h-cont">
             <div style={{marginBottom:40}}>
               <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Beautiful spaces, curated for you</h2>
             </div>
@@ -121,12 +121,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{padding:'80px 44px',background:'#fff'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
+        <section className="h-sec" style={{background:'#fff'}}>
+          <div className="h-cont">
             <div style={{textAlign:'center',marginBottom:48}}>
               <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Find designers near you</h2>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
+            <div className="h-grid-3" style={{gap:16}}>
               {CITIES.map(city=>(
                 <Link key={city.name} href={`/browse?city=${city.name}`} style={{textDecoration:'none',display:'block',borderRadius:16,overflow:'hidden',position:'relative',height:200}}>
                   <img src={city.img} alt={city.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
@@ -140,18 +140,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{padding:'80px 44px',background:'var(--c)'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:40}}>
+        <section className="h-sec" style={{background:'var(--c)'}}>
+          <div className="h-cont">
+            <div className="h-row-between" style={{alignItems:'flex-end',marginBottom:40}}>
               <div>
                 <div style={{fontSize:'.72rem',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:'var(--tlt)',marginBottom:12}}>From Our Blog</div>
                 <h2 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Design guides and expert advice</h2>
               </div>
-              <Link href="/blog" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 24px',background:'transparent',color:'var(--t)',border:'1.5px solid var(--t)',borderRadius:50,fontWeight:600,fontSize:'.88rem',textDecoration:'none'}}>
+              <Link href="/blog" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 24px',background:'transparent',color:'var(--t)',border:'1.5px solid var(--t)',borderRadius:50,fontWeight:600,fontSize:'.88rem',textDecoration:'none',whiteSpace:'nowrap'}}>
                 All articles
               </Link>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}>
+            <div className="h-grid-3">
               {BLOGS.map((blog,i)=>(
                 <Link key={i} href={blog.href} style={{textDecoration:'none',display:'block',background:'#fff',borderRadius:16,overflow:'hidden',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
                   <div style={{height:200,overflow:'hidden'}}>
@@ -170,7 +170,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section style={{padding:'80px 44px',background:'var(--b)',textAlign:'center'}}>
+        <section className="h-sec" style={{background:'var(--b)',textAlign:'center'}}>
           <div style={{maxWidth:600,margin:'0 auto'}}>
             <h2 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:16}}>Ready to build your dream home?</h2>
             <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>

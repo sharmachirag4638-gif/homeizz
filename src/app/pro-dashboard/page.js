@@ -126,6 +126,22 @@ export default function ProDashboard(){
 
       {/* Main */}
       <main style={{marginLeft:260,flex:1,padding:'32px 36px',minHeight:'100vh'}}>
+        {/* Mobile tab bar (visible only on small screens) */}
+        <div className="h-mtab-bar">
+          {NAV.map(n=>(
+            <div key={n.id} className={`h-mtab${tab===n.id?' on':''}`} onClick={()=>setTab(n.id)}>
+              <span>{n.icon}</span>
+              {n.label}
+              {n.id==='enquiries'&&newEnquiries>0&&(
+                <span className="h-mtab-bdg">{newEnquiries}</span>
+              )}
+            </div>
+          ))}
+          <div className="h-mtab" onClick={signOut}>
+            <span>🚪</span> Sign Out
+          </div>
+        </div>
+
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:32}}>
           <div>
             <h1 style={{fontFamily:'var(--fd)',fontSize:'1.8rem',color:'var(--b)',marginBottom:4}}>
