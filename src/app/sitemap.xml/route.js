@@ -6,7 +6,7 @@ import { createAdmin } from '@/lib/supabase-server';
 // Lists: home, static pages, every (city × style) landing page, every listing,
 // every designer profile. Could be 50,000+ URLs easily — which is the point.
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://homeizz.com';
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://homeizz.in';
 
 export async function GET() {
   const urls = [];
@@ -44,17 +44,17 @@ export async function GET() {
   // Dynamic content: listings + designer profiles (best-effort; ignore errors)
   try {
     const sb = createAdmin();
-    const { data: listings } = await sb.from('listings').select('id,updated_at').eq('status', 'live').limit(5000);
+    const { data: listings } = await sb.from('listings').select('id,created_at').eq('status', 'live').limit(5000);
     listings?.forEach(l => urls.push({
       loc: `${SITE}/listing/${l.id}`,
-      lastmod: l.updated_at,
+      lastmod: l.created_at,
       priority: 0.7,
       changefreq: 'weekly',
     }));
-    const { data: profiles } = await sb.from('profiles').select('id,updated_at').eq('public', true).limit(5000);
+    const { data: profiles } = await sb.from('profiles').select('id,created_at').in('user_type', ['professional','architect','designer']).limit(5000);
     profiles?.forEach(p => urls.push({
       loc: `${SITE}/designer/${p.id}`,
-      lastmod: p.updated_at,
+      lastmod: p.created_at,
       priority: 0.6,
       changefreq: 'weekly',
     }));

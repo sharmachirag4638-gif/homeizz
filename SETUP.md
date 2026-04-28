@@ -162,14 +162,14 @@ create index if not exists idx_listings_status on listings(status);
 4. Copy `Key ID` → `.env.local` as `NEXT_PUBLIC_RAZORPAY_KEY_ID`
 5. Copy `Key Secret` → `.env.local` as `RAZORPAY_KEY_SECRET`
 6. When you go live: switch to Live Mode, complete KYC (takes 2-3 days in India), generate live keys, replace env vars in Vercel.
-7. Optional: set up a webhook at Settings → Webhooks pointing to `https://homeizz.com/api/razorpay/verify` for additional redundancy.
+7. Optional: set up a webhook at Settings → Webhooks pointing to `https://homeizz.in/api/razorpay/verify` for additional redundancy.
 
 ### 4. Resend setup (for emails)
 
 1. Sign up at https://resend.com (free tier: 3,000 emails/month)
-2. Add and verify `homeizz.com` as a domain (DNS records go in GoDaddy)
+2. Add and verify `homeizz.in` as a domain (DNS records go in GoDaddy)
 3. Create an API key → put in `.env.local` as `RESEND_API_KEY`
-4. Set `RESEND_FROM_EMAIL=hello@homeizz.com`
+4. Set `RESEND_FROM_EMAIL=hello@homeizz.in`
 
 ### 5. Deploy to Vercel
 
@@ -189,7 +189,7 @@ Two options:
    - `RAZORPAY_KEY_SECRET`
    - `RESEND_API_KEY`
    - `RESEND_FROM_EMAIL`
-   - `NEXT_PUBLIC_SITE_URL` (set to `https://homeizz.com`)
+   - `NEXT_PUBLIC_SITE_URL` (set to `https://homeizz.in`)
 6. Hit "Redeploy" on the Deployments tab
 
 **B. Via CLI**
@@ -202,24 +202,24 @@ vercel --prod
 
 ### 6. GoDaddy → Vercel DNS
 
-In Vercel: Project → Settings → Domains → Add `homeizz.com` and `www.homeizz.com`. Vercel shows you the exact DNS records to add.
+In Vercel: Project → Settings → Domains → Add `homeizz.in` and `www.homeizz.in`. Vercel shows you the exact DNS records to add.
 
-In GoDaddy: DNS Management for `homeizz.com`:
+In GoDaddy: DNS Management for `homeizz.in`:
 - **A record** — Host `@`, Points to `76.76.21.21`, TTL 600
 - **CNAME** — Host `www`, Points to `cname.vercel-dns.com`, TTL 600
 - Delete any existing `@` or `www` A/CNAME records that conflict
 
 **Do NOT use GoDaddy's "Domain Forwarding" feature.** It breaks HTTPS and SEO. Use real DNS records as above.
 
-Propagation takes 10 minutes to a few hours. Once green in Vercel, visit `https://homeizz.com`.
+Propagation takes 10 minutes to a few hours. Once green in Vercel, visit `https://homeizz.in`.
 
 ### 7. Google Search Console
 
 Once live:
 1. Go to https://search.google.com/search-console
-2. Add property: `https://homeizz.com`
+2. Add property: `https://homeizz.in`
 3. Verify ownership (easiest: add a TXT record in GoDaddy)
-4. Submit sitemap: `https://homeizz.com/sitemap.xml`
+4. Submit sitemap: `https://homeizz.in/sitemap.xml`
 5. In ~2 weeks you'll start seeing impressions in the Performance report. Watch for city + style keyword queries.
 
 ---

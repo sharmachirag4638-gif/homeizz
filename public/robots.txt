@@ -4,4 +4,4 @@ Disallow: /dashboard
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://homeizz.com/sitemap.xml
+Sitemap: https://homeizz.in/sitemap.xml

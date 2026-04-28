@@ -651,6 +651,89 @@ a{text-decoration:none;color:inherit;}
   .plan-cards3,.frow2{grid-template-columns:1fr;}
 }
 
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE OVERRIDES (Phase 3 - 2026-04-28)
+   Targets inline-styled pages without requiring full refactor.
+   Uses attribute selectors + !important to override inline styles.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Reusable responsive utility classes (preferred for new code) */
+.h-sec{padding:80px 44px;}
+.h-sec.tight{padding:60px 44px;}
+.h-cont{max-width:1100px;margin:0 auto;}
+.h-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.h-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+.h-grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;}
+.h-row-between{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+
+@media(max-width:768px){
+  /* Utility class mobile rules */
+  .h-sec{padding:48px 18px;}
+  .h-sec.tight{padding:36px 18px;}
+  .h-grid-3,.h-grid-2{grid-template-columns:1fr;gap:18px;}
+  .h-row-between{flex-direction:column;align-items:stretch;}
+
+  /* ── Inline-style override layer ──
+     React serializes style={{a:'b'}} into style="a:b" with no spaces.
+     These selectors catch the common patterns and force responsive behavior. */
+
+  /* 3-col grids → 1 column */
+  [style*="repeat(3,1fr)"],[style*="repeat(3, 1fr)"],
+  [style*="repeat(4,1fr)"],[style*="repeat(4, 1fr)"]{
+    grid-template-columns:1fr!important;
+  }
+  /* 1fr 300px sidebar layouts → stacked */
+  [style*="1fr 300px"],[style*="1fr 320px"],[style*="1fr 344px"],[style*="1fr 368px"]{
+    grid-template-columns:1fr!important;
+  }
+
+  /* Wide horizontal padding → mobile-friendly */
+  [style*="padding:'80px 44px'"],[style*="padding: 80px 44px"]{padding:48px 16px!important;}
+  [style*="padding:'60px 44px'"],[style*="padding: 60px 44px"]{padding:40px 16px!important;}
+  [style*="padding:'48px 44px'"],[style*="padding: 48px 44px"]{padding:36px 16px!important;}
+  [style*="padding:'40px 44px'"],[style*="padding: 40px 44px"]{padding:28px 16px!important;}
+  [style*="padding:'32px 44px'"],[style*="padding: 32px 44px"]{padding:24px 16px!important;}
+  [style*="padding:'80px 24px 60px'"]{padding:80px 14px 40px!important;}
+  [style*="padding:'0 32px'"],[style*="padding: 0 32px"]{padding:0 14px!important;}
+
+  /* Pro-dashboard fixed sidebar → hide on mobile (we'll add a hamburger later) */
+  aside[style*="260"][style*="fixed"]{
+    transform:translateX(-100%)!important;
+    transition:transform .25s!important;
+  }
+  /* When sidebar is hidden, content should not be offset */
+  [style*="margin-left: 260"],[style*="margin-left:260"],
+  [style*="marginLeft: 260"],[style*="marginLeft:260"]{
+    margin-left:0!important;
+  }
+
+  /* Tab bars / button rows that need wrapping */
+  [style*="display:'flex'"][style*="justifyContent:'space-between'"]{
+    flex-wrap:wrap!important;
+  }
+
+  /* Two-column grids for content (not forms) → stack */
+  [style*="gridTemplateColumns:'2fr 1fr'"],[style*="grid-template-columns: 2fr 1fr"]{
+    grid-template-columns:1fr!important;
+  }
+
+  /* Large hero text scaling already handled by clamp() in original code */
+
+  /* Container max-widths shouldn't add side padding on small screens */
+  [style*="maxWidth:1100"][style*="margin:'0 auto'"],
+  [style*="maxWidth:1160"][style*="margin:'0 auto'"]{
+    max-width:100%!important;
+  }
+}
+
+/* Tablet (769–1024) — softer 2-col fallback */
+@media(min-width:769px) and (max-width:1024px){
+  .h-grid-3{grid-template-columns:repeat(2,1fr);}
+  [style*="repeat(4,1fr)"],[style*="repeat(4, 1fr)"]{
+    grid-template-columns:repeat(2,1fr)!important;
+  }
+}
+
 /* ══ DASHBOARD ══ */
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased;}

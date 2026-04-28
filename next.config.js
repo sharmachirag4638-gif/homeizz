@@ -11,8 +11,8 @@ const nextConfig = {
       // Force www -> apex (or flip this if you prefer www)
       {
         source: '/:path*',
-        has: [{ type: 'host', value: 'www.homeizz.com' }],
-        destination: 'https://homeizz.com/:path*',
+        has: [{ type: 'host', value: 'www.homeizz.in' }],
+        destination: 'https://homeizz.in/:path*',
         permanent: true,
       },
     ];
