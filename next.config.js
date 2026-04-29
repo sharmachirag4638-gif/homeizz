@@ -6,17 +6,8 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.supabase.co' },
     ],
   },
-  async redirects() {
-    return [
-      // Force www -> apex (or flip this if you prefer www)
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'www.homeizz.in' }],
-        destination: 'https://homeizz.in/:path*',
-        permanent: true,
-      },
-    ];
-  },
+  // www <-> apex redirect is handled by Vercel domain config (Project → Settings → Domains).
+  // Do NOT duplicate it here or it will cause a redirect loop.
   async headers() {
     return [
       {
