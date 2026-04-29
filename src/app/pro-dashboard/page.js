@@ -409,21 +409,23 @@ export default function ProDashboard(){
           <div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16,marginBottom:24}}>
               {[
-                {id:'starter',name:'Starter',price:'₹499',annual:'₹4,990',listings:3,visibility:'60 days',color:'#6B7F5E'},
-                {id:'growth',name:'Growth',price:'₹1,499',annual:'₹14,990',listings:10,visibility:'150 days',color:'#C4622D',popular:true},
-                {id:'pro',name:'Pro',price:'₹3,999',annual:'₹39,990',listings:25,visibility:'6 months',color:'#B8860B'},
+                {id:'starter',name:'Starter',price:'₹499',annual:'₹4,990',listings:3,visibility:'60 days',color:'#6B7F5E',features:['3 listings','Visible for 60 days','Verified profile badge','Direct enquiries (no commission)','Email notifications','City + style tagging']},
+                {id:'growth',name:'Growth',price:'₹1,499',annual:'₹14,990',listings:10,visibility:'150 days',color:'#C4622D',popular:true,features:['10 listings','Visible for 150 days','Everything in Starter','WhatsApp enquiry alerts','Priority placement in city pages','Detailed enquiry analytics','Email + WhatsApp support']},
+                {id:'pro',name:'Pro',price:'₹3,999',annual:'₹39,990',listings:25,visibility:'6 months',color:'#B8860B',features:['25 listings','Visible for 6 months','Everything in Growth','Featured on Homeizz home page','Custom firm landing page','Dedicated account manager']},
               ].map(p=>(
                 <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${plan===p.id?p.color:'var(--borderl)'}`,position:'relative'}}>
                   {p.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:p.color,color:'#fff',fontSize:'.68rem',fontWeight:700,padding:'3px 12px',borderRadius:50}}>MOST POPULAR</div>}
                   {plan===p.id&&<div style={{position:'absolute',top:14,right:14,background:p.color,color:'#fff',fontSize:'.65rem',fontWeight:700,padding:'2px 8px',borderRadius:50}}>YOUR PLAN</div>}
                   <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:4}}>{p.name}</h3>
                   <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:p.color}}>{p.price}<span style={{fontSize:'.9rem',fontWeight:400,color:'var(--tlt)'}}>/mo</span></div>
-                  <div style={{fontSize:'.75rem',color:'var(--tlt)',marginBottom:16}}>{p.annual}/year</div>
-                  <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:20}}>
-                    <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ {p.listings} listings</div>
-                    <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ Visible for {p.visibility}</div>
-                    <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ Email notifications</div>
-                    <div style={{fontSize:'.82rem',color:'var(--tm)'}}>✓ Enquiry dashboard</div>
+                  <div style={{fontSize:'.75rem',color:'var(--sage)',marginBottom:16,fontWeight:600}}>or {p.annual}/yr · save 2 months</div>
+                  <div style={{display:'flex',flexDirection:'column',gap:7,marginBottom:20,paddingTop:14,borderTop:'1px solid var(--borderl)'}}>
+                    {p.features.map((f,i)=>(
+                      <div key={i} style={{fontSize:'.78rem',color:'var(--tm)',display:'flex',alignItems:'flex-start',gap:6,lineHeight:1.4}}>
+                        <span style={{color:p.color,fontWeight:700,flexShrink:0}}>✓</span>
+                        <span>{f}</span>
+                      </div>
+                    ))}
                   </div>
                   <button style={{width:'100%',padding:'11px',border:`2px solid ${p.color}`,borderRadius:10,background:plan===p.id?p.color:'transparent',color:plan===p.id?'#fff':p.color,fontWeight:700,cursor:'pointer',fontSize:'.85rem'}}>
                     {plan===p.id?(isTrialActive?'Current Plan (Trial)':'Current Plan'):'Switch Plan'}

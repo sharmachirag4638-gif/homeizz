@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: 'How much does it cost for professionals to list?',
-    a: 'Professionals get 3 months free trial. After that, plans start from ₹499/month for the Starter plan, ₹1,499/month for Growth, and ₹3,999/month for Pro.'
+    a: 'Professionals get a 90-day free trial — no credit card needed. After that, three plans: Starter at ₹499/mo (3 listings, basics), Growth at ₹1,499/mo (10 listings + WhatsApp alerts + priority placement + analytics — most popular), and Pro at ₹3,999/mo (25 listings + featured on home page + custom firm landing page + dedicated manager). Annual billing saves you 2 months on every plan. No commission on projects you close.'
   },
   {
     q: 'Can I cancel my professional subscription?',

@@ -22,10 +22,36 @@ const PROJECT_TYPES = [
   'Residential','Commercial','Office','Retail','Hospitality','Villa','Apartment','Bungalow'
 ];
 
+const STARTER_FEATURES = [
+  '3 listings',
+  'Visible for 60 days',
+  'Verified profile badge',
+  'Direct enquiries (no commission)',
+  'Email notifications',
+  'City + style tagging',
+];
+const GROWTH_FEATURES = [
+  '10 listings',
+  'Visible for 150 days',
+  'Everything in Starter',
+  'WhatsApp enquiry alerts',
+  'Priority placement in city pages',
+  'Detailed enquiry analytics',
+  'Email + WhatsApp support',
+];
+const PRO_FEATURES = [
+  '25 listings',
+  'Visible for 6 months',
+  'Everything in Growth',
+  'Featured on Homeizz home page',
+  'Custom firm landing page',
+  'Dedicated account manager',
+];
+
 const PLANS = [
-  {id:'starter',name:'Starter',monthly:499,annual:4990,annualMonthly:416,listings:3,visibility:'60 days',color:'#6B7F5E',popular:false},
-  {id:'growth',name:'Growth',monthly:1499,annual:14990,annualMonthly:1249,listings:10,visibility:'150 days',color:'#C4622D',popular:true},
-  {id:'pro',name:'Pro',monthly:3999,annual:39990,annualMonthly:3333,listings:25,visibility:'6 months',color:'#B8860B',popular:false},
+  {id:'starter',name:'Starter',monthly:499,annual:4990,annualMonthly:416,listings:3,visibility:'60 days',color:'#6B7F5E',popular:false,features:STARTER_FEATURES},
+  {id:'growth',name:'Growth',monthly:1499,annual:14990,annualMonthly:1249,listings:10,visibility:'150 days',color:'#C4622D',popular:true,features:GROWTH_FEATURES},
+  {id:'pro',name:'Pro',monthly:3999,annual:39990,annualMonthly:3333,listings:25,visibility:'6 months',color:'#B8860B',popular:false,features:PRO_FEATURES},
 ];
 
 const STEPS = [
@@ -337,29 +363,55 @@ export default function ProSignup(){
           {step===7&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Choose Your Plan</h2>
-              <p style={{marginBottom:24,fontSize:'.9rem'}}>Start free for 3 months - no card needed now</p>
-              <div style={{background:'linear-gradient(135deg,#6B7F5E,#4A6040)',borderRadius:12,padding:'14px 20px',marginBottom:24,display:'flex',alignItems:'center',gap:12}}>
+              <p style={{marginBottom:20,fontSize:'.9rem'}}>Start free for 3 months — no card needed now</p>
+
+              <div style={{background:'linear-gradient(135deg,#6B7F5E,#4A6040)',borderRadius:12,padding:'14px 20px',marginBottom:20,display:'flex',alignItems:'center',gap:12}}>
                 <span style={{fontSize:'1.5rem'}}>🎉</span>
                 <div>
                   <div style={{color:'#fff',fontWeight:700,fontSize:'.9rem'}}>3 Months FREE Trial</div>
                   <div style={{color:'rgba(255,255,255,.8)',fontSize:'.78rem'}}>No credit card needed. First charge after 90 days.</div>
                 </div>
               </div>
+
+              {/* Billing toggle */}
+              <div style={{display:'flex',justifyContent:'center',marginBottom:18}}>
+                <div style={{display:'inline-flex',background:'var(--c)',borderRadius:50,padding:4,border:'1.5px solid var(--borderl)'}}>
+                  <div onClick={()=>setBilling('monthly')} style={{padding:'8px 18px',borderRadius:50,cursor:'pointer',fontSize:'.82rem',fontWeight:600,background:billing==='monthly'?'var(--t)':'transparent',color:billing==='monthly'?'#fff':'var(--tlt)',transition:'all .2s'}}>
+                    Monthly
+                  </div>
+                  <div onClick={()=>setBilling('annual')} style={{padding:'8px 18px',borderRadius:50,cursor:'pointer',fontSize:'.82rem',fontWeight:600,background:billing==='annual'?'var(--t)':'transparent',color:billing==='annual'?'#fff':'var(--tlt)',transition:'all .2s',display:'flex',alignItems:'center',gap:6}}>
+                    Annual <span style={{fontSize:'.65rem',background:billing==='annual'?'rgba(255,255,255,.22)':'var(--sage)',color:'#fff',padding:'2px 7px',borderRadius:50,fontWeight:700}}>2 months free</span>
+                  </div>
+                </div>
+              </div>
+
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                {PLANS.map(plan=>(
-                  <div key={plan.id} onClick={()=>setSelectedPlan(plan.id)} style={{border:`2px solid ${selectedPlan===plan.id?plan.color:'var(--borderl)'}`,borderRadius:16,padding:'18px 20px',cursor:'pointer',background:selectedPlan===plan.id?`${plan.color}15`:'#fff',position:'relative'}}>
+                {PLANS.map(plan=>{
+                  const displayPrice = billing==='annual' ? plan.annualMonthly : plan.monthly;
+                  return (
+                  <div key={plan.id} onClick={()=>setSelectedPlan(plan.id)} style={{border:`2px solid ${selectedPlan===plan.id?plan.color:'var(--borderl)'}`,borderRadius:16,padding:'18px 20px',cursor:'pointer',background:selectedPlan===plan.id?`${plan.color}10`:'#fff',position:'relative'}}>
                     {plan.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:plan.color,color:'#fff',fontSize:'.7rem',fontWeight:700,padding:'3px 14px',borderRadius:50}}>MOST POPULAR</div>}
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}}>
                       <div>
-                        <div style={{fontWeight:700,color:'var(--b)',fontSize:'1rem',marginBottom:4}}>{plan.name}</div>
-                        <div style={{fontSize:'.8rem',color:'var(--tlt)'}}>{plan.listings} listings · Visible for {plan.visibility}</div>
+                        <div style={{fontWeight:700,color:'var(--b)',fontSize:'1.05rem',marginBottom:2}}>{plan.name}</div>
+                        <div style={{fontSize:'.78rem',color:'var(--tlt)'}}>{plan.listings} listings · Visible for {plan.visibility}</div>
                       </div>
                       <div style={{textAlign:'right'}}>
-                        <div style={{fontWeight:800,color:plan.color,fontSize:'1.3rem'}}>Rs {plan.monthly.toLocaleString()}<span style={{fontSize:'.75rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span></div>
+                        <div style={{fontWeight:800,color:plan.color,fontSize:'1.4rem',lineHeight:1}}>Rs {displayPrice.toLocaleString()}<span style={{fontSize:'.72rem',fontWeight:500,color:'var(--tlt)'}}>/mo</span></div>
+                        {billing==='annual' && <div style={{fontSize:'.66rem',color:'var(--sage)',fontWeight:700,marginTop:3}}>Rs {plan.annual.toLocaleString()}/yr · billed yearly</div>}
                       </div>
                     </div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'5px 12px',paddingTop:10,borderTop:'1px solid var(--borderl)'}}>
+                      {plan.features.map((f,i)=>(
+                        <div key={i} style={{fontSize:'.74rem',color:'var(--tm)',display:'flex',alignItems:'flex-start',gap:5}}>
+                          <span style={{color:plan.color,fontWeight:700,flexShrink:0}}>✓</span>
+                          <span>{f}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
