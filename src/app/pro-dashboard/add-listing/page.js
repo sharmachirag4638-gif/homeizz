@@ -86,9 +86,18 @@ export default function AddListing() {
   }
 
   function handlePhotos(e) {
-    const files = [...e.target.files].slice(0, 10);
-    setPhotos(files);
-    setPhotoPreviews(files.map(f => URL.createObjectURL(f)));
+    const newFiles = [...e.target.files];
+    setPhotos(prev => {
+      const combined = [...prev, ...newFiles].slice(0, 10);
+      return combined;
+    });
+    setPhotoPreviews(prev => {
+      const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+      const combined = [...prev, ...newPreviews].slice(0, 10);
+      return combined;
+    });
+    // Reset the file input so user can select the same file again if they removed it
+    e.target.value = '';
   }
 
   function removePhoto(idx) {

@@ -14,6 +14,8 @@ export async function GET() {
   // Static pages
   urls.push({ loc: `${SITE}/`,               priority: 1.0, changefreq: 'weekly' });
   urls.push({ loc: `${SITE}/browse`,         priority: 0.9, changefreq: 'daily'  });
+  urls.push({ loc: `${SITE}/pricing`,        priority: 0.8, changefreq: 'monthly' });
+  urls.push({ loc: `${SITE}/pro-signup`,     priority: 0.7, changefreq: 'monthly' });
   urls.push({ loc: `${SITE}/list`,           priority: 0.7, changefreq: 'monthly' });
   urls.push({ loc: `${SITE}/auth`,           priority: 0.5, changefreq: 'monthly' });
   urls.push({ loc: `${SITE}/faq`,            priority: 0.6, changefreq: 'monthly' });

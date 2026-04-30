@@ -30,6 +30,7 @@ export default function Footer() {
         <div className="footer-col">
           <h4>For Professionals</h4>
           <Link href="/pro-signup">List your work</Link>
+          <Link href="/pricing">Pricing</Link>
           <Link href="/auth">Sign in</Link>
           <Link href="/pro-dashboard">Dashboard</Link>
           <Link href="/faq">FAQ</Link>

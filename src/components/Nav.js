@@ -27,6 +27,7 @@ export default function Nav() {
         <Link href="/browse" className="nl">Browse</Link>
         <Link href="/architects/Mumbai/modern" className="nl">Architects</Link>
         <Link href="/interior-designer/Mumbai/modern" className="nl">Interior</Link>
+        <Link href="/pricing" className="nl">Pricing</Link>
         {user ? (
           <div onClick={()=>meta.role==='professional'?router.push('/pro-dashboard'):router.push('/dashboard')} className="nav-av" title={meta.full_name||'Account'}>
             {initials}
