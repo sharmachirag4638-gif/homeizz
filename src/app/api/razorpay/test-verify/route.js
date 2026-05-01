@@ -16,7 +16,8 @@ export async function POST(req) {
       return NextResponse.json({ ok: false, error: 'missing fields' }, { status: 400 });
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET;
+    // Prefer dedicated test secret; fall back to regular if not set
+    const secret = process.env.RAZORPAY_TEST_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
     if (!secret) return NextResponse.json({ ok: false, error: 'Razorpay secret not configured' }, { status: 500 });
 
     const expected = crypto

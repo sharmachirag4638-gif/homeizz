@@ -19,13 +19,16 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Amount out of test range (₹1 to ₹10,000)' }, { status: 400 });
     }
 
-    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    // Prefer dedicated test env vars; fall back to the regular ones if not set
+    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_TEST_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET;
     if (!keyId || !keySecret) {
       return NextResponse.json({ error: 'Razorpay env vars not configured on server' }, { status: 500 });
     }
     if (!keyId.startsWith('rzp_test_')) {
-      return NextResponse.json({ error: 'Refusing to run test page in live mode. Use rzp_test_ keys.' }, { status: 400 });
+      return NextResponse.json({
+        error: 'No rzp_test_ keys found. Add NEXT_PUBLIC_RAZORPAY_TEST_KEY_ID and RAZORPAY_TEST_KEY_SECRET in Vercel and redeploy.',
+      }, { status: 400 });
     }
 
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
