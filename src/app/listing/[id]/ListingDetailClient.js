@@ -42,54 +42,31 @@ export default function ListingDetailClient({ listing, professional }) {
 
   async function sendEnquiry() {
     if (!enquiryName||!enquiryPhone||!enquiryBudget||!enquiryMessage) return setErr('Please fill all required fields');
+    if (!user?.id) return setErr('Please sign in to send an enquiry');
     setBusy(true); setErr('');
     try {
-      const { error: dbErr } = await sb.from('enquiries').insert({
+      const { data: row, error: dbErr } = await sb.from('enquiries').insert({
         listing_id: listing.id,
         professional_id: listing.owner_id || listing.user_id,
-        homeowner_id: user?.id || null,
+        homeowner_id: user.id,
         homeowner_name: enquiryName,
         homeowner_phone: enquiryPhone,
-        homeowner_email: user?.email || null,
+        homeowner_email: user.email || null,
         budget: enquiryBudget,
         timeline: enquiryTimeline,
         project_type: enquiryProjectType,
         message: enquiryMessage,
         status: 'new',
-      });
+      }).select('id').single();
       if (dbErr) throw dbErr;
 
-      await fetch('/api/send-email', {
+      // Don't block success on email delivery — the row is the source of truth.
+      fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: professional?.email,
-          subject: `New Enquiry on Homeizz — ${enquiryProjectType||'Project'} in ${listing.city}`,
-          html: `
-            <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#FAF6F0;border-radius:16px;">
-              <h1 style="color:#C4622D;text-align:center;">Homeizz</h1>
-              <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #E2CDB8;margin-bottom:16px;">
-                <h2 style="color:#2C1508;margin:0 0 16px;">You have a new enquiry! 🎉</h2>
-                <table style="width:100%;border-collapse:collapse;">
-                  <tr><td style="padding:8px 0;color:#8C6444;width:140px;">From</td><td style="padding:8px 0;color:#2C1508;font-weight:600;">${enquiryName}</td></tr>
-                  <tr><td style="padding:8px 0;color:#8C6444;">Phone</td><td style="padding:8px 0;color:#2C1508;font-weight:600;">${enquiryPhone}</td></tr>
-                  <tr><td style="padding:8px 0;color:#8C6444;">Project</td><td style="padding:8px 0;color:#2C1508;font-weight:600;">${enquiryProjectType||'Not specified'}</td></tr>
-                  <tr><td style="padding:8px 0;color:#8C6444;">Budget</td><td style="padding:8px 0;color:#2C1508;font-weight:600;">${enquiryBudget}</td></tr>
-                  <tr><td style="padding:8px 0;color:#8C6444;">Timeline</td><td style="padding:8px 0;color:#2C1508;font-weight:600;">${enquiryTimeline||'Not specified'}</td></tr>
-                  <tr><td style="padding:8px 0;color:#8C6444;">Listing</td><td style="padding:8px 0;color:#2C1508;font-weight:600;">${listing.title}</td></tr>
-                </table>
-                <div style="margin-top:16px;padding:16px;background:#FAF6F0;border-radius:8px;border-left:3px solid #C4622D;">
-                  <p style="color:#8C6444;margin:0 0 6px;font-weight:600;">Message:</p>
-                  <p style="color:#2C1508;margin:0;line-height:1.6;">${enquiryMessage}</p>
-                </div>
-              </div>
-              <div style="text-align:center;">
-                <a href="https://www.homeizz.in/pro-dashboard" style="display:inline-block;padding:14px 28px;background:#C4622D;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;">View in Dashboard →</a>
-              </div>
-            </div>
-          `,
-        }),
-      });
+        body: JSON.stringify({ type: 'enquiry', enquiryId: row.id }),
+      }).catch(() => {});
+
       setSuccess(true);
     } catch(e) {
       setErr(e.message||'Something went wrong.');

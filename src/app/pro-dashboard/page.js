@@ -94,9 +94,9 @@ export default function ProDashboard(){
   const displayName = meta.full_name||'Professional';
   const initials = displayName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   const plan = meta.plan||'growth';
-  const trialEnd = meta.trial_end?new Date(meta.trial_end):new Date(Date.now()+90*24*60*60*1000);
-  const daysLeft = Math.max(0,Math.ceil((trialEnd-new Date())/(1000*60*60*24)));
-  const isTrialActive = daysLeft>0;
+  const trialEnd = meta.trial_end ? new Date(meta.trial_end) : null;
+  const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd - new Date()) / (1000*60*60*24))) : 0;
+  const isTrialActive = !!trialEnd && daysLeft > 0;
   const currentPlan = planDetails[plan]||planDetails.growth;
   const newEnquiries = enquiries.filter(e=>e.status==='new').length;
 

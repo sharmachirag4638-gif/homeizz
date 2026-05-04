@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/razorpay/create-order
- * Body: { quoteId: string, milestoneIndex: number, amountPaise: number }
+ * Body: { quoteId: string, milestoneIndex: number }
  *
- * Creates a Razorpay order, records a pending payment row, and returns
- * the order_id + amount so the client can open Razorpay Checkout.
+ * The amount is derived from the quote's milestones on the server — never
+ * trust a client-supplied amount, or a malicious user can pay ₹1 for a ₹10L quote.
  */
 export async function POST(req) {
   try {
@@ -18,12 +18,11 @@ export async function POST(req) {
     const { data: userData } = await sb.auth.getUser();
     if (!userData?.user) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
 
-    const { quoteId, milestoneIndex, amountPaise } = await req.json();
-    if (!quoteId || !Number.isInteger(milestoneIndex) || !Number.isInteger(amountPaise) || amountPaise < 100) {
+    const { quoteId, milestoneIndex } = await req.json();
+    if (!quoteId || !Number.isInteger(milestoneIndex) || milestoneIndex < 0) {
       return NextResponse.json({ error: 'invalid input' }, { status: 400 });
     }
 
-    // Validate the quote is real and belongs to this user (via the quote_request)
     const admin = createAdmin();
     const { data: q } = await admin
       .from('quotes')
@@ -39,6 +38,27 @@ export async function POST(req) {
       .single();
     if (!qr || qr.homeowner_id !== userData.user.id) {
       return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+    }
+
+    // Derive amount from the milestone — ignore anything the client claims.
+    const milestones = Array.isArray(q.milestones) ? q.milestones : [];
+    if (milestoneIndex >= milestones.length) {
+      return NextResponse.json({ error: 'invalid milestone' }, { status: 400 });
+    }
+    const amountPaise = Number(milestones[milestoneIndex]?.paise);
+    if (!Number.isInteger(amountPaise) || amountPaise < 100) {
+      return NextResponse.json({ error: 'milestone amount unavailable' }, { status: 400 });
+    }
+
+    // Reject duplicate orders for the same milestone if one is already paid or pending.
+    const { data: existing } = await admin
+      .from('payments')
+      .select('id, status')
+      .eq('quote_id', quoteId)
+      .eq('milestone_index', milestoneIndex)
+      .in('status', ['paid', 'created']);
+    if (existing && existing.some(p => p.status === 'paid')) {
+      return NextResponse.json({ error: 'milestone already paid' }, { status: 409 });
     }
 
     const razorpay = new Razorpay({

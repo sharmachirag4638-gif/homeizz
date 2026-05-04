@@ -35,7 +35,7 @@ function AuthForm() {
     setGoogleBusy(true); setErr('');
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${redirect}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}` },
     });
     if (error) { setErr(error.message); setGoogleBusy(false); }
   }

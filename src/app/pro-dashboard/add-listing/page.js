@@ -78,25 +78,47 @@ export default function AddListing() {
     });
   }, []);
 
+  const MAX_BYTES = 10 * 1024 * 1024;
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  const ALLOWED_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
+
+  function getExt(name) {
+    const i = (name || '').lastIndexOf('.');
+    return i > 0 ? name.slice(i + 1).toLowerCase() : '';
+  }
+
+  function validateImage(file) {
+    if (!file) return 'No file selected';
+    if (file.size > MAX_BYTES) return `${file.name}: file is larger than 10MB`;
+    const type = (file.type || '').toLowerCase();
+    if (!ALLOWED_TYPES.includes(type)) return `${file.name}: only JPG, PNG, or WebP allowed`;
+    const ext = getExt(file.name);
+    if (!ALLOWED_EXTS.includes(ext)) return `${file.name}: file extension must be jpg, png, or webp`;
+    return null;
+  }
+
   function handleCoverImage(e) {
     const file = e.target.files[0];
     if (!file) return;
+    const problem = validateImage(file);
+    if (problem) { setErr(problem); e.target.value = ''; return; }
+    setErr('');
     setCoverImage(file);
     setCoverPreview(URL.createObjectURL(file));
   }
 
   function handlePhotos(e) {
-    const newFiles = [...e.target.files];
-    setPhotos(prev => {
-      const combined = [...prev, ...newFiles].slice(0, 10);
-      return combined;
-    });
-    setPhotoPreviews(prev => {
-      const newPreviews = newFiles.map(f => URL.createObjectURL(f));
-      const combined = [...prev, ...newPreviews].slice(0, 10);
-      return combined;
-    });
-    // Reset the file input so user can select the same file again if they removed it
+    const incoming = [...e.target.files];
+    const accepted = [];
+    let firstProblem = null;
+    for (const f of incoming) {
+      const problem = validateImage(f);
+      if (problem) { firstProblem = firstProblem || problem; continue; }
+      accepted.push(f);
+    }
+    if (firstProblem) setErr(firstProblem); else setErr('');
+    setPhotos(prev => [...prev, ...accepted].slice(0, 10));
+    setPhotoPreviews(prev => [...prev, ...accepted.map(f => URL.createObjectURL(f))].slice(0, 10));
     e.target.value = '';
   }
 
@@ -117,16 +139,23 @@ export default function AddListing() {
     if (!coverImage) return setErr('Please upload a cover photo');
     setBusy(true); setErr('');
     try {
+      const coverProblem = validateImage(coverImage);
+      if (coverProblem) throw new Error(coverProblem);
+      for (const p of photos) {
+        const photoProblem = validateImage(p);
+        if (photoProblem) throw new Error(photoProblem);
+      }
+
       const uid = user.id;
       const timestamp = Date.now();
-      const coverExt = coverImage.name.split('.').pop();
+      const coverExt = getExt(coverImage.name) || 'jpg';
       const coverPath = `${uid}/cover_${timestamp}.${coverExt}`;
       const { error: coverErr } = await sb.storage.from('listings').upload(coverPath, coverImage);
       if (coverErr) throw coverErr;
       const { data: coverUrl } = sb.storage.from('listings').getPublicUrl(coverPath);
       let photoUrls = [];
       for (let i=0; i<photos.length; i++) {
-        const ext = photos[i].name.split('.').pop();
+        const ext = getExt(photos[i].name) || 'jpg';
         const path = `${uid}/photo_${timestamp}_${i}.${ext}`;
         await sb.storage.from('listings').upload(path, photos[i]);
         const { data: url } = sb.storage.from('listings').getPublicUrl(path);
@@ -303,7 +332,7 @@ export default function AddListing() {
                       <div style={{fontSize:'2.5rem',marginBottom:8}}>📸</div>
                       <div style={{fontWeight:600,color:'var(--b)',marginBottom:4}}>Click to upload cover photo</div>
                       <div style={{fontSize:'.75rem',color:'var(--tlt)'}}>JPG, PNG — max 10MB</div>
-                      <input type="file" accept="image/*" onChange={handleCoverImage} style={{display:'none'}}/>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleCoverImage} style={{display:'none'}}/>
                     </label>
                   )}
                 </div>
@@ -323,7 +352,7 @@ export default function AddListing() {
                     <label style={{display:'block',border:'2px dashed var(--borderl)',borderRadius:12,padding:'20px',textAlign:'center',cursor:'pointer',background:'var(--c)'}}>
                       <div style={{fontSize:'1.5rem',marginBottom:4}}>➕</div>
                       <div style={{fontSize:'.82rem',fontWeight:600,color:'var(--b)'}}>Add photos ({photoPreviews.length}/10)</div>
-                      <input type="file" accept="image/*" multiple onChange={handlePhotos} style={{display:'none'}}/>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handlePhotos} style={{display:'none'}}/>
                     </label>
                   )}
                 </div>

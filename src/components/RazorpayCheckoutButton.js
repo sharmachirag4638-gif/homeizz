@@ -9,7 +9,7 @@ import { inr } from '@/lib/utils';
  *   <RazorpayCheckoutButton
  *     quoteId={quote.id}
  *     milestoneIndex={0}
- *     amountPaise={5000000}       // ₹50,000
+ *     amountPaise={5000000}       // optional — display only; server is source of truth
  *     userEmail={user.email}
  *     userPhone={user.phone}
  *     onSuccess={() => refresh()}
@@ -26,11 +26,13 @@ export default function RazorpayCheckoutButton({
   async function handleClick() {
     setBusy(true);
     try {
-      // 1. Create order on our server (keeps RAZORPAY_KEY_SECRET out of client)
+      // 1. Create order on our server (keeps RAZORPAY_KEY_SECRET out of client).
+      //    Note: amount is intentionally NOT sent — the server derives it from the
+      //    quote's milestones so a tampered client can't pay ₹1 for a ₹1L milestone.
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quoteId, milestoneIndex, amountPaise }),
+        body: JSON.stringify({ quoteId, milestoneIndex }),
       });
       const order = await orderRes.json();
       if (!orderRes.ok) throw new Error(order.error || 'Could not start payment');

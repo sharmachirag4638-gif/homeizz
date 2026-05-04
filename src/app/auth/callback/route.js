@@ -1,10 +1,23 @@
 import { createServer } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 
+/**
+ * Only allow same-origin paths. Reject anything that:
+ *   - is empty / not a string
+ *   - doesn't start with `/`
+ *   - starts with `//` or `/\` (browser-quirk path-confusion phishing vectors)
+ */
+function safeNext(next) {
+  if (typeof next !== 'string' || next.length === 0) return '/dashboard';
+  if (!next.startsWith('/')) return '/dashboard';
+  if (next.startsWith('//') || next.startsWith('/\\')) return '/dashboard';
+  return next === '/' ? '/dashboard' : next;
+}
+
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const next = safeNext(searchParams.get('next'));
 
   if (code) {
     const supabase = createServer();
@@ -25,7 +38,7 @@ export async function GET(request) {
         return NextResponse.redirect(`${origin}/pro-dashboard`);
       }
 
-      return NextResponse.redirect(`${origin}${next === '/' ? '/dashboard' : next}`);
+      return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
