@@ -7,9 +7,8 @@ import Footer from '@/components/Footer';
 export const dynamic = 'force-dynamic';
 
 const TEST_CARDS = [
-  { network: 'Visa',       number: '4111 1111 1111 1111', note: 'Always succeeds' },
-  { network: 'Mastercard', number: '5267 3181 8797 5449', note: 'Always succeeds' },
-  { network: 'Failure',    number: '4000 0000 0000 0002', note: 'Always fails (test failure flow)' },
+  { network: 'Visa (India)',       number: '4012 0010 3818 8351', note: 'Domestic — works on Indian accounts' },
+  { network: 'Mastercard (India)', number: '5104 0600 0000 0008', note: 'Domestic — works on Indian accounts' },
 ];
 
 export default function TestPaymentPage() {

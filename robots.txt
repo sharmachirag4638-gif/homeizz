@@ -1,0 +1,9 @@
+# https://homeizz.com/robots.txt
+User-agent: *
+Allow: /
+
+# Block internal/admin panels if they ever get exposed
+Disallow: /dashboard
+Disallow: /admin
+
+Sitemap: https://homeizz.com/sitemap.xml
