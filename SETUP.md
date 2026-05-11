@@ -161,8 +161,10 @@ create index if not exists idx_listings_status on listings(status);
 3. Settings → API Keys → Generate Test Key
 4. Copy `Key ID` → `.env.local` as `NEXT_PUBLIC_RAZORPAY_KEY_ID`
 5. Copy `Key Secret` → `.env.local` as `RAZORPAY_KEY_SECRET`
-6. When you go live: switch to Live Mode, complete KYC (takes 2-3 days in India), generate live keys, replace env vars in Vercel.
-7. Optional: set up a webhook at Settings → Webhooks pointing to `https://homeizz.in/api/razorpay/verify` for additional redundancy.
+6. Create six Razorpay Subscription Plans: Starter monthly, Starter annual, Growth monthly, Growth annual, Pro monthly, Pro annual. Add their `plan_...` IDs to `.env.local` and Vercel as `RAZORPAY_PLAN_STARTER_MONTHLY`, `RAZORPAY_PLAN_STARTER_ANNUAL`, `RAZORPAY_PLAN_GROWTH_MONTHLY`, `RAZORPAY_PLAN_GROWTH_ANNUAL`, `RAZORPAY_PLAN_PRO_MONTHLY`, and `RAZORPAY_PLAN_PRO_ANNUAL`.
+7. Run `supabase/03_subscriptions_2026_05_11.sql` in Supabase SQL Editor so profiles can store Razorpay subscription state.
+8. Set up a webhook at Settings → Webhooks pointing to `https://homeizz.in/api/razorpay/webhook`, choose subscription events, and save the secret as `RAZORPAY_WEBHOOK_SECRET`.
+9. When you go live: switch to Live Mode, complete KYC (takes 2-3 days in India), generate live keys, replace env vars in Vercel.
 
 ### 4. Resend setup (for emails)
 

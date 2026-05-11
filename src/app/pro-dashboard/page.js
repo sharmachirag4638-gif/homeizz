@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
+import { PLANS } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,33 +14,62 @@ const NAV = [
   {id:'subscription',icon:'💳',label:'Subscription'},
 ];
 
-const planDetails = {
-  starter:{name:'Starter',listings:3,color:'#6B7F5E',price:'₹499/mo'},
-  growth:{name:'Growth',listings:10,color:'#C4622D',price:'₹1,499/mo'},
-  pro:{name:'Pro',listings:25,color:'#B8860B',price:'₹3,999/mo'},
-};
+const planDetails = Object.fromEntries(PLANS.map(plan => [
+  plan.id,
+  {
+    name: plan.name,
+    listings: plan.listings,
+    color: plan.color,
+    price: `Rs ${plan.monthly.toLocaleString('en-IN')}/mo`,
+  },
+]));
+
+const SUBSCRIPTION_PROFILE_FIELDS = 'id, full_name, phone, user_type, role, plan, billing_interval, subscription_status, razorpay_subscription_id, razorpay_plan_id, subscription_current_start, subscription_current_end, subscription_cancel_at_cycle_end, subscription_cancelled_at, subscription_pending_plan, subscription_pending_interval';
+
+function normalizeBillingInterval(interval) {
+  return interval === 'annual' ? 'annual' : 'monthly';
+}
+
+function formatBillingDate(value) {
+  if (!value) return 'Not set';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Not set';
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export default function ProDashboard(){
   const sb = createClient();
   const router = useRouter();
   const [tab,setTab] = useState('overview');
   const [user,setUser] = useState(null);
+  const [profile,setProfile] = useState(null);
   const [listings,setListings] = useState([]);
   const [enquiries,setEnquiries] = useState([]);
   const [loading,setLoading] = useState(true);
+  const [billingInterval,setBillingInterval] = useState('monthly');
+  const [billingBusy,setBillingBusy] = useState('');
+  const [billingMessage,setBillingMessage] = useState('');
+  const [billingError,setBillingError] = useState('');
 
   useEffect(()=>{
     sb.auth.getUser().then(async({data})=>{
       if(!data.user){router.push('/auth');return;}
       if(data.user.user_metadata?.role!=='professional'){router.push('/');return;}
       setUser(data.user);
-      // Fetch listings and enquiries in parallel
-      const [listingsRes, enquiriesRes] = await Promise.all([
+      // Fetch listings, enquiries, and billing profile in parallel.
+      const [listingsRes, enquiriesRes, profileRes] = await Promise.all([
         sb.from('listings').select('*').eq('owner_id',data.user.id).order('created_at',{ascending:false}),
         sb.from('enquiries').select('*').eq('professional_id',data.user.id).order('created_at',{ascending:false}),
+        sb.from('profiles').select(SUBSCRIPTION_PROFILE_FIELDS).eq('id',data.user.id).single(),
       ]);
       setListings(listingsRes.data||[]);
       setEnquiries(enquiriesRes.data||[]);
+      setProfile(profileRes.data||null);
+      setBillingInterval(normalizeBillingInterval(
+        profileRes.data?.billing_interval ||
+        data.user.user_metadata?.billing_interval ||
+        data.user.user_metadata?.billing
+      ));
       setLoading(false);
     });
   },[]);
@@ -58,6 +88,130 @@ export default function ProDashboard(){
     if (!enq || enq.status !== 'new') return;
     setEnquiries(prev => prev.map(e => e.id === enqId ? {...e, status: 'replied'} : e));
     await sb.from('enquiries').update({status:'replied'}).eq('id', enqId);
+  }
+
+  function loadRazorpayCheckout(){
+    return new Promise(resolve=>{
+      if(window.Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = ()=>resolve(true);
+      script.onerror = ()=>resolve(false);
+      document.body.appendChild(script);
+    });
+  }
+
+  async function refreshBillingState(){
+    const {data:userData} = await sb.auth.getUser();
+    if(userData?.user) setUser(userData.user);
+    const userId = userData?.user?.id || user?.id;
+    if(!userId) return;
+    const {data:profileData} = await sb.from('profiles').select(SUBSCRIPTION_PROFILE_FIELDS).eq('id',userId).single();
+    if(profileData){
+      setProfile(profileData);
+      setBillingInterval(normalizeBillingInterval(profileData.billing_interval));
+    }
+  }
+
+  async function startOrChangeSubscription(targetPlanId){
+    const targetPlan = PLANS.find(p=>p.id===targetPlanId);
+    if(!targetPlan) return;
+
+    setBillingBusy(targetPlanId);
+    setBillingError('');
+    setBillingMessage('');
+
+    try{
+      const metadata = user?.user_metadata||{};
+      const subscriptionId = profile?.razorpay_subscription_id || metadata.razorpay_subscription_id;
+      const status = profile?.subscription_status || metadata.subscription_status;
+      const canChangeExisting = !!subscriptionId && ['authenticated','active'].includes(status);
+      const endpoint = canChangeExisting ? '/api/razorpay/change-subscription' : '/api/razorpay/create-subscription';
+
+      const res = await fetch(endpoint, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({planId:targetPlanId,billingInterval}),
+      });
+      const payload = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(payload.error||'Subscription request failed');
+
+      if(canChangeExisting){
+        await refreshBillingState();
+        setBillingMessage(payload.scheduleChangeAt === 'cycle_end'
+          ? `${targetPlan.name} is scheduled for the end of this billing period.`
+          : `Your plan is now ${targetPlan.name}.`
+        );
+        return;
+      }
+
+      const ready = await loadRazorpayCheckout();
+      if(!ready) throw new Error('Could not load Razorpay Checkout');
+
+      const options = {
+        key: payload.keyId,
+        subscription_id: payload.subscriptionId,
+        name: 'Homeizz',
+        description: `${targetPlan.name} plan - ${billingInterval}`,
+        prefill: {
+          name: displayName,
+          email: user?.email || '',
+          contact: profile?.phone || metadata.phone || '',
+        },
+        notes: {
+          homeizz_plan: targetPlanId,
+          homeizz_billing_interval: billingInterval,
+        },
+        theme: { color: targetPlan.color },
+        modal: {
+          ondismiss: ()=>setBillingBusy(''),
+        },
+        handler: async (response)=>{
+          try{
+            const verifyRes = await fetch('/api/razorpay/verify-subscription', {
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify(response),
+            });
+            const verifyPayload = await verifyRes.json().catch(()=>({}));
+            if(!verifyRes.ok || !verifyPayload.ok) throw new Error(verifyPayload.error||'Subscription verification failed');
+            await refreshBillingState();
+            setBillingMessage('Subscription verified. Your billing is connected.');
+          }catch(e){
+            setBillingError(e.message||'Subscription verification failed');
+          }finally{
+            setBillingBusy('');
+          }
+        },
+      };
+
+      new window.Razorpay(options).open();
+    }catch(e){
+      setBillingError(e.message||'Something went wrong');
+      setBillingBusy('');
+    }
+  }
+
+  async function cancelSubscription(){
+    if(!confirm('Cancel this subscription at the end of the current billing period?')) return;
+    setBillingBusy('cancel');
+    setBillingError('');
+    setBillingMessage('');
+    try{
+      const res = await fetch('/api/razorpay/cancel-subscription', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({cancelAtCycleEnd:true}),
+      });
+      const payload = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(payload.error||'Could not cancel subscription');
+      await refreshBillingState();
+      setBillingMessage('Cancellation scheduled. Your listings stay active until the period ends.');
+    }catch(e){
+      setBillingError(e.message||'Could not cancel subscription');
+    }finally{
+      setBillingBusy('');
+    }
   }
 
   function waPhone(phone){
@@ -91,13 +245,23 @@ export default function ProDashboard(){
   );
 
   const meta = user?.user_metadata||{};
-  const displayName = meta.full_name||'Professional';
+  const profileMeta = Object.fromEntries(Object.entries(profile||{}).filter(([,value])=>value!==null&&value!==undefined));
+  const account = {...meta,...profileMeta};
+  const displayName = account.full_name||'Professional';
   const initials = displayName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const plan = meta.plan||'growth';
+  const plan = account.plan||'growth';
   const trialEnd = meta.trial_end ? new Date(meta.trial_end) : null;
   const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd - new Date()) / (1000*60*60*24))) : 0;
   const isTrialActive = !!trialEnd && daysLeft > 0;
   const currentPlan = planDetails[plan]||planDetails.growth;
+  const activeBillingInterval = normalizeBillingInterval(account.billing_interval||account.billing);
+  const subscriptionStatus = account.subscription_status || (isTrialActive ? 'trialing' : 'inactive');
+  const currentSubscriptionId = account.razorpay_subscription_id;
+  const cancelAtCycleEnd = !!account.subscription_cancel_at_cycle_end;
+  const pendingPlan = account.subscription_pending_plan;
+  const pendingInterval = normalizeBillingInterval(account.subscription_pending_interval);
+  const hasBillingSubscription = !!currentSubscriptionId && ['authenticated','active','pending','halted'].includes(subscriptionStatus);
+  const pendingPlanDetails = pendingPlan ? planDetails[pendingPlan] : null;
   const newEnquiries = enquiries.filter(e=>e.status==='new').length;
 
   return(
@@ -462,41 +626,82 @@ export default function ProDashboard(){
         {/* SUBSCRIPTION */}
         {tab==='subscription'&&(
           <div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16,marginBottom:24}}>
-              {[
-                {id:'starter',name:'Starter',price:'₹499',annual:'₹4,990',listings:3,visibility:'60 days',color:'#6B7F5E',features:['3 listings','Visible for 60 days','Verified profile badge','Direct enquiries (no commission)','Email notifications','City + style tagging']},
-                {id:'growth',name:'Growth',price:'₹1,499',annual:'₹14,990',listings:10,visibility:'150 days',color:'#C4622D',popular:true,features:['10 listings','Visible for 150 days','Everything in Starter','WhatsApp enquiry alerts','Priority placement in city pages','Detailed enquiry analytics','Email + WhatsApp support']},
-                {id:'pro',name:'Pro',price:'₹3,999',annual:'₹39,990',listings:25,visibility:'6 months',color:'#B8860B',features:['25 listings','Visible for 6 months','Everything in Growth','Featured on Homeizz home page','Custom firm landing page','Dedicated account manager']},
-              ].map(p=>(
-                <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${plan===p.id?p.color:'var(--borderl)'}`,position:'relative'}}>
-                  {p.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:p.color,color:'#fff',fontSize:'.68rem',fontWeight:700,padding:'3px 12px',borderRadius:50}}>MOST POPULAR</div>}
-                  {plan===p.id&&<div style={{position:'absolute',top:14,right:14,background:p.color,color:'#fff',fontSize:'.65rem',fontWeight:700,padding:'2px 8px',borderRadius:50}}>YOUR PLAN</div>}
-                  <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:4}}>{p.name}</h3>
-                  <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:p.color}}>{p.price}<span style={{fontSize:'.9rem',fontWeight:400,color:'var(--tlt)'}}>/mo</span></div>
-                  <div style={{fontSize:'.75rem',color:'var(--sage)',marginBottom:16,fontWeight:600}}>or {p.annual}/yr · save 2 months</div>
-                  <div style={{display:'flex',flexDirection:'column',gap:7,marginBottom:20,paddingTop:14,borderTop:'1px solid var(--borderl)'}}>
-                    {p.features.map((f,i)=>(
-                      <div key={i} style={{fontSize:'.78rem',color:'var(--tm)',display:'flex',alignItems:'flex-start',gap:6,lineHeight:1.4}}>
-                        <span style={{color:p.color,fontWeight:700,flexShrink:0}}>✓</span>
-                        <span>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button style={{width:'100%',padding:'11px',border:`2px solid ${p.color}`,borderRadius:10,background:plan===p.id?p.color:'transparent',color:plan===p.id?'#fff':p.color,fontWeight:700,cursor:'pointer',fontSize:'.85rem'}}>
-                    {plan===p.id?(isTrialActive?'Current Plan (Trial)':'Current Plan'):'Switch Plan'}
-                  </button>
+            <div style={{background:'#fff',borderRadius:16,padding:'22px 24px',border:'1.5px solid var(--borderl)',marginBottom:18,display:'flex',gap:18,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
+              <div>
+                <div style={{fontSize:'.72rem',fontWeight:800,letterSpacing:'.8px',textTransform:'uppercase',color:'var(--tlt)',marginBottom:8}}>Billing status</div>
+                <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                  <span style={{background:currentPlan.color,color:'#fff',fontSize:'.75rem',fontWeight:800,padding:'5px 12px',borderRadius:50}}>{currentPlan.name}</span>
+                  <span style={{color:'var(--tm)',fontSize:'.86rem',fontWeight:600,textTransform:'capitalize'}}>{subscriptionStatus.replaceAll('_',' ')}</span>
+                  <span style={{color:'var(--tlt)',fontSize:'.82rem'}}>Billing: {activeBillingInterval}</span>
+                  {account.subscription_current_end&&<span style={{color:'var(--tlt)',fontSize:'.82rem'}}>Renews: {formatBillingDate(account.subscription_current_end)}</span>}
                 </div>
-              ))}
-            </div>
-            {isTrialActive&&(
-              <div style={{background:'#fff',borderRadius:16,padding:'24px',border:'1.5px solid var(--borderl)',display:'flex',alignItems:'center',gap:20}}>
-                <span style={{fontSize:'2.5rem'}}>🎉</span>
-                <div>
-                  <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:4}}>Free Trial Active!</h3>
-                  <p style={{color:'var(--tlt)',fontSize:'.85rem'}}>Your trial ends in <strong style={{color:'var(--t)'}}>{daysLeft} days</strong>. After that, your {currentPlan.name} plan at {currentPlan.price} will start automatically.</p>
-                </div>
+                {pendingPlanDetails&&(
+                  <div style={{marginTop:8,color:'#92400E',fontSize:'.82rem',fontWeight:600}}>Pending switch to {pendingPlanDetails.name} ({pendingInterval}) at cycle end.</div>
+                )}
+                {cancelAtCycleEnd&&(
+                  <div style={{marginTop:8,color:'#92400E',fontSize:'.82rem',fontWeight:600}}>Cancellation scheduled. Listings stay active until the current period ends.</div>
+                )}
+                {isTrialActive&&!hasBillingSubscription&&(
+                  <div style={{marginTop:8,color:'var(--tlt)',fontSize:'.82rem'}}>Trial has {daysLeft} days left. Set up Razorpay now and billing starts after trial.</div>
+                )}
               </div>
-            )}
+              {hasBillingSubscription&&!cancelAtCycleEnd&&(
+                <button onClick={cancelSubscription} disabled={!!billingBusy} style={{padding:'10px 16px',border:'1.5px solid #FECACA',borderRadius:10,background:'#fff',color:'#DC2626',fontWeight:700,cursor:billingBusy?'not-allowed':'pointer',fontSize:'.82rem'}}>
+                  {billingBusy==='cancel'?'Cancelling...':'Cancel at period end'}
+                </button>
+              )}
+            </div>
+
+            {billingError&&<div style={{background:'#FEF2F2',border:'1px solid #FECACA',color:'#DC2626',borderRadius:10,padding:'12px 16px',marginBottom:18,fontSize:'.85rem',fontWeight:600}}>{billingError}</div>}
+            {billingMessage&&<div style={{background:'#ECFDF5',border:'1px solid #A7F3D0',color:'#065F46',borderRadius:10,padding:'12px 16px',marginBottom:18,fontSize:'.85rem',fontWeight:600}}>{billingMessage}</div>}
+
+            <div style={{display:'flex',justifyContent:'center',marginBottom:22}}>
+              <div style={{display:'inline-flex',background:'#fff',border:'1.5px solid var(--borderl)',borderRadius:50,padding:4,gap:4}}>
+                <button onClick={()=>setBillingInterval('monthly')} style={{border:'none',borderRadius:50,padding:'8px 18px',fontWeight:700,cursor:'pointer',background:billingInterval==='monthly'?'var(--t)':'transparent',color:billingInterval==='monthly'?'#fff':'var(--tlt)'}}>Monthly</button>
+                <button onClick={()=>setBillingInterval('annual')} style={{border:'none',borderRadius:50,padding:'8px 18px',fontWeight:700,cursor:'pointer',background:billingInterval==='annual'?'var(--t)':'transparent',color:billingInterval==='annual'?'#fff':'var(--tlt)'}}>Annual</button>
+              </div>
+            </div>
+
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16,marginBottom:24}}>
+              {PLANS.map(p=>{
+                const price = billingInterval==='annual' ? p.annualMonthly : p.monthly;
+                const isCurrentBilling = hasBillingSubscription && plan===p.id && activeBillingInterval===billingInterval && !pendingPlan && !cancelAtCycleEnd;
+                const isCurrentPlan = plan===p.id;
+                const disabled = isCurrentBilling || !!billingBusy;
+                const label = billingBusy===p.id
+                  ? 'Working...'
+                  : isCurrentBilling
+                    ? 'Current Plan'
+                    : hasBillingSubscription
+                      ? `Switch to ${p.name}`
+                      : isTrialActive
+                        ? (isCurrentPlan ? 'Set up billing' : `Switch to ${p.name}`)
+                        : `Subscribe to ${p.name}`;
+                return(
+                  <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${isCurrentPlan?p.color:'var(--borderl)'}`,position:'relative'}}>
+                    {p.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:p.color,color:'#fff',fontSize:'.68rem',fontWeight:700,padding:'3px 12px',borderRadius:50}}>MOST POPULAR</div>}
+                    {isCurrentPlan&&<div style={{position:'absolute',top:14,right:14,background:p.color,color:'#fff',fontSize:'.65rem',fontWeight:700,padding:'2px 8px',borderRadius:50}}>YOUR PLAN</div>}
+                    {pendingPlan===p.id&&<div style={{position:'absolute',top:40,right:14,background:'#FEF3C7',color:'#92400E',fontSize:'.65rem',fontWeight:700,padding:'2px 8px',borderRadius:50}}>PENDING</div>}
+                    <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:4}}>{p.name}</h3>
+                    <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:p.color}}>Rs {price.toLocaleString('en-IN')}<span style={{fontSize:'.9rem',fontWeight:400,color:'var(--tlt)'}}>/mo</span></div>
+                    <div style={{fontSize:'.75rem',color:'var(--sage)',marginBottom:16,fontWeight:600}}>
+                      {billingInterval==='annual' ? `Rs ${p.annual.toLocaleString('en-IN')}/yr - billed yearly` : `Rs ${p.monthly.toLocaleString('en-IN')}/mo - billed monthly`}
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',gap:7,marginBottom:20,paddingTop:14,borderTop:'1px solid var(--borderl)'}}>
+                      {p.features.map((f,i)=>(
+                        <div key={i} style={{fontSize:'.78rem',color:'var(--tm)',display:'flex',alignItems:'flex-start',gap:6,lineHeight:1.4}}>
+                          <span style={{color:p.color,fontWeight:700,flexShrink:0}}>✓</span>
+                          <span>{f}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={()=>startOrChangeSubscription(p.id)} disabled={disabled} style={{width:'100%',padding:'11px',border:`2px solid ${p.color}`,borderRadius:10,background:isCurrentBilling?p.color:'transparent',color:isCurrentBilling?'#fff':p.color,fontWeight:700,cursor:disabled?'not-allowed':'pointer',fontSize:'.85rem',opacity:disabled ? .85 : 1}}>
+                      {label}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </main>
