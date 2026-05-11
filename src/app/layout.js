@@ -1,50 +1,68 @@
 import './globals.css';
 import Script from 'next/script';
+import { SITE_URL, absoluteUrl } from '@/lib/seo';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.homeizz.in';
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const GOOGLE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION;
+const OG_IMAGE = 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200&h=630&fit=crop&q=80';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Homeizz – India's Home Design Marketplace",
+    default: 'Homeizz - Architects & Interior Designers in India',
     template: '%s | Homeizz',
   },
   description:
-    "Homeizz is India's home design marketplace. Discover verified architects, interior designers, and ready-to-build home plans across India.",
+    'Find verified architects, interior designers, modular kitchen experts, and ready-to-build home plans across India. Compare portfolios and request quotes on Homeizz.',
   keywords: [
-    'home design India', 'architects India', 'interior designers',
-    'house plans', 'home renovation', 'vastu', '3BHK design',
-    'modular kitchen', 'Homeizz',
+    'architects in India',
+    'interior designers in India',
+    'home design marketplace',
+    'house plans India',
+    'modular kitchen designers',
+    'home renovation India',
+    'vastu home design',
+    '3BHK interior design',
+    'Homeizz',
   ],
   authors: [{ name: 'Homeizz' }],
-  robots: { index: true, follow: true, 'max-image-preview': 'large' },
+  creator: 'Homeizz',
+  publisher: 'Homeizz',
+  category: 'Home Design',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
+    },
+  },
   alternates: { canonical: '/' },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
-    apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
   verification: GOOGLE_VERIFICATION ? { google: GOOGLE_VERIFICATION } : undefined,
   openGraph: {
     type: 'website',
     siteName: 'Homeizz',
-    title: "Homeizz – India's Home Design Marketplace",
+    title: 'Homeizz - Architects & Interior Designers in India',
     description:
-      'Discover verified architects, interior designers, and ready-to-build home plans across India.',
+      'Discover verified architects, interior designers, modular kitchen experts, and home plans across India.',
     url: SITE_URL,
     locale: 'en_IN',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Modern Indian home design inspiration' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Homeizz – India's Home Design Marketplace",
+    title: 'Homeizz - Architects & Interior Designers in India',
     description: 'Verified architects, interior designers, and home plans across India.',
-    images: ['/og-image.jpg'],
+    images: [OG_IMAGE],
   },
 };
 
@@ -64,16 +82,18 @@ const orgJsonLd = {
       '@id': `${SITE_URL}/#organization`,
       name: 'Homeizz',
       url: SITE_URL,
-      logo: `${SITE_URL}/logo.png`,
+      logo: absoluteUrl('/favicon.svg'),
       description:
         "India's home design marketplace connecting homeowners with verified architects, interior designers, and ready-to-build home plans.",
       areaServed: { '@type': 'Country', name: 'India' },
+      sameAs: ['https://instagram.com/homeizz.in'],
     },
     {
       '@type': 'WebSite',
       '@id': `${SITE_URL}/#website`,
       url: SITE_URL,
       name: 'Homeizz',
+      inLanguage: 'en-IN',
       publisher: { '@id': `${SITE_URL}/#organization` },
       potentialAction: {
         '@type': 'SearchAction',

@@ -255,9 +255,9 @@ export default function CostGuideBody() {
 
       <p style={pStyle}>
         Looking for an architect or designer in a specific city? See verified options in{' '}
-        <Link href="/architects/Mumbai/modern" style={linkStyle}>Mumbai</Link>,{' '}
-        <Link href="/architects/Bangalore/modern" style={linkStyle}>Bangalore</Link>,{' '}
-        <Link href="/architects/Delhi/modern" style={linkStyle}>Delhi</Link>, and{' '}
+        <Link href="/architects/mumbai/modern" style={linkStyle}>Mumbai</Link>,{' '}
+        <Link href="/architects/bangalore/modern" style={linkStyle}>Bangalore</Link>,{' '}
+        <Link href="/architects/delhi/modern" style={linkStyle}>Delhi</Link>, and{' '}
         <Link href="/browse" style={linkStyle}>25+ other Indian cities</Link>.
       </p>
 

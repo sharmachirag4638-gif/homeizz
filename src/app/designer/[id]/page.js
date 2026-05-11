@@ -2,15 +2,24 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import { notFound } from 'next/navigation';
 import { createServer } from '@/lib/supabase-server';
+import { absoluteUrl, truncateMeta } from '@/lib/seo';
 
 export async function generateMetadata({ params }) {
   const sb = createServer();
   const { data } = await sb.from('profiles').select('full_name,role,city,bio').eq('id', params.id).single();
   if (!data) return { title: 'Designer not found' };
+  const role = data.role || 'designer';
+  const title = `${data.full_name}${data.city ? ` - ${role} in ${data.city}` : ''}`;
+  const description = truncateMeta(data.bio || `${data.full_name} is a verified ${role} on Homeizz${data.city ? ` in ${data.city}` : ''}. View portfolio and request a quote.`);
   return {
-    title: `${data.full_name}${data.city ? ' — ' + data.role + ' in ' + data.city : ''}`,
-    description: (data.bio || `${data.full_name} is a verified ${data.role} on Homeizz.`).slice(0, 160),
+    title,
+    description,
     alternates: { canonical: `/designer/${params.id}` },
+    openGraph: {
+      title,
+      description,
+      url: absoluteUrl(`/designer/${params.id}`),
+    },
   };
 }
 
@@ -24,6 +33,7 @@ export default async function DesignerPage({ params }) {
     '@context': 'https://schema.org',
     '@type': 'ProfessionalService',
     name: profile.full_name,
+    url: absoluteUrl(`/designer/${params.id}`),
     address: { '@type': 'PostalAddress', addressLocality: profile.city, addressCountry: 'IN' },
     description: profile.bio,
   };

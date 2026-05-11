@@ -1,9 +1,12 @@
-# https://homeizz.com/robots.txt
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /pro-dashboard/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /verify/
+Disallow: /test-payment/
+Disallow: /quote/
+Disallow: /api/
 
-# Block internal/admin panels if they ever get exposed
-Disallow: /dashboard
-Disallow: /admin
-
-Sitemap: https://homeizz.com/sitemap.xml
+Sitemap: https://www.homeizz.in/sitemap.xml

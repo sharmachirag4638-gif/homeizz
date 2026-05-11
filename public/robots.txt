@@ -1,7 +1,12 @@
 User-agent: *
 Allow: /
-Disallow: /dashboard
-Disallow: /admin
+Disallow: /dashboard/
+Disallow: /pro-dashboard/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /verify/
+Disallow: /test-payment/
+Disallow: /quote/
 Disallow: /api/
 
-Sitemap: https://homeizz.in/sitemap.xml
+Sitemap: https://www.homeizz.in/sitemap.xml

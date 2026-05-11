@@ -1,9 +1,12 @@
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import { jsonLdScript } from '@/lib/seo';
 
 export const metadata = {
-  title: 'FAQ | Homeizz',
-  description: 'Frequently asked questions about Homeizz.',
+  title: 'Homeizz FAQ - Architects, Interior Designers & Pricing',
+  description:
+    'Frequently asked questions about Homeizz, verified architects, interior designers, homeowner enquiries, professional listings, pricing, and support.',
+  alternates: { canonical: '/about' },
 };
 
 const FAQS = [
@@ -49,10 +52,21 @@ const FAQS = [
   },
 ];
 
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map(faq => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: { '@type': 'Answer', text: faq.a },
+  })),
+};
+
 export default function FAQPage() {
   return (
     <>
       <Nav/>
+      <script {...jsonLdScript(faqJsonLd)} />
       <div style={{minHeight:'100vh',background:'var(--c)',paddingTop:64}}>
         <div style={{background:'var(--b)',padding:'60px 44px'}}>
           <div style={{maxWidth:800,margin:'0 auto'}}>

@@ -6,8 +6,15 @@ import { createServer } from '@/lib/supabase-server';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Browse Home Designs & Architects | Homeizz',
-  description: 'Browse verified architects, interior designers, and ready-to-build home plans across India.',
+  title: 'Browse Architects, Interior Designers & Home Plans',
+  description:
+    'Browse verified architects, interior designers, modular kitchen experts, and ready-to-build home plans across India on Homeizz.',
+  alternates: { canonical: '/browse' },
+  openGraph: {
+    title: 'Browse Architects, Interior Designers & Home Plans',
+    description:
+      'Compare portfolios, styles, budgets, and quotes from verified home design professionals across India.',
+  },
 };
 
 function ListingCard({ listing }) {
@@ -34,7 +41,7 @@ export default async function BrowsePage({ searchParams }) {
   let listings = [];
   try {
     const sb = createServer();
-    let query = sb.from('listings').select('*').eq('status','active');
+    let query = sb.from('listings').select('*').eq('status','live');
     if (city) query = query.eq('city', city);
     if (style) query = query.eq('style', style);
     if (type) query = query.eq('listing_type', type);
@@ -51,8 +58,8 @@ export default async function BrowsePage({ searchParams }) {
       <div style={{background:'var(--c)',minHeight:'100vh',paddingTop:64}}>
         <div style={{background:'var(--b)',padding:'40px 44px'}}>
           <div style={{maxWidth:1100,margin:'0 auto'}}>
-            <h1 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:8}}>Browse Designs</h1>
-            <p style={{color:'rgba(255,255,255,.55)',fontSize:'.95rem'}}>Discover verified architects and interior designers across India</p>
+            <h1 style={{fontFamily:'var(--fd)',color:'#fff',marginBottom:8}}>Browse architects, interior designers and home plans</h1>
+            <p style={{color:'rgba(255,255,255,.55)',fontSize:'.95rem'}}>Discover verified home design professionals across India</p>
           </div>
         </div>
         <div style={{maxWidth:1100,margin:'0 auto',padding:'32px 44px 80px'}}>

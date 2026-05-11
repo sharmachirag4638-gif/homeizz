@@ -45,7 +45,7 @@ export default function RazorpayCheckoutButton({
         currency: order.currency,
         name: 'Homeizz',
         description: `Milestone ${milestoneIndex + 1}`,
-        image: '/logo.png',
+        image: '/favicon.svg',
         prefill: { name: userName, email: userEmail, contact: userPhone },
         theme: { color: '#C4622D' },
         // 3. On success, verify signature server-side

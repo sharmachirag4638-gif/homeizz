@@ -1,90 +1,114 @@
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import { POSTS } from '@/lib/blog';
 
-const POSTS = [
-  { slug:'top-interior-designers-mumbai', title:'Top 10 Interior Designers in Mumbai 2026', excerpt:'Discover the most talented and highly-rated interior designers in Mumbai. Compare portfolios and find the perfect match for your home.', city:'Mumbai', time:'5 min read', img:'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80', category:'City Guide' },
-  { slug:'top-architects-bangalore', title:'Best Architects in Bangalore: A Complete 2026 Guide', excerpt:'Looking for an architect in Bangalore? Here are the top firms and independent architects known for their exceptional work.', city:'Bangalore', time:'6 min read', img:'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80', category:'City Guide' },
-  { slug:'modern-vs-minimalist', title:'Modern vs Minimalist: Which Interior Style is Right for You?', excerpt:'Confused between modern and minimalist design? We break down the key differences to help you choose.', city:'Design Guide', time:'7 min read', img:'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80', category:'Design Guide' },
-  { slug:'interior-design-cost-india', title:'How Much Does Home Interior Design Cost in India 2026?', excerpt:'A comprehensive guide to interior design costs in India. From budget to luxury, know what to expect.', city:'Cost Guide', time:'8 min read', img:'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80', category:'Cost Guide' },
-  { slug:'vastu-shastra-modern-homes', title:'Vastu Shastra for Modern Homes: A Practical Guide', excerpt:'How to incorporate Vastu principles in your modern home design without compromising on aesthetics.', city:'Vastu', time:'6 min read', img:'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&q=80', category:'Tips' },
-  { slug:'questions-ask-interior-designer', title:'10 Questions to Ask Your Interior Designer Before Hiring', excerpt:'Make sure you are making the right choice. These key questions will help you find the perfect designer.', city:'Tips', time:'4 min read', img:'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&q=80', category:'Tips' },
-];
+export const metadata = {
+  title: 'Blog — Home Design Guides for India',
+  description:
+    "Real guides on interior design costs, architects in your city, vastu, modern vs minimalist, and how to hire the right designer. Written for Indian homeowners.",
+  alternates: { canonical: '/blog' },
+  openGraph: {
+    title: 'Homeizz Blog — Home Design Guides for India',
+    description: 'Real, in-depth guides on home design, costs, and finding the right architect in India.',
+  },
+};
 
-export async function generateStaticParams() {
-  return POSTS.map(p => ({ slug: p.slug }));
-}
-
-export async function generateMetadata({ params }) {
-  const post = POSTS.find(p => p.slug === params.slug);
-  return {
-    title: post ? `${post.title} | Homeizz Blog` : 'Blog | Homeizz',
-    description: post?.excerpt || '',
-  };
-}
-
-export default function BlogPostPage({ params }) {
-  const post = POSTS.find(p => p.slug === params.slug);
-
-  if (!post) {
-    return (
-      <>
-        <Nav/>
-        <div style={{minHeight:'100vh',background:'var(--c)',paddingTop:64,display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <div style={{textAlign:'center'}}>
-            <h1 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:12}}>Post not found</h1>
-            <Link href="/blog" style={{color:'var(--t)',fontWeight:600}}>← Back to Blog</Link>
-          </div>
-        </div>
-        <Footer/>
-      </>
-    );
-  }
+export default function BlogIndexPage() {
+  // Featured post = the first one (most recent / highest priority)
+  const [featured, ...rest] = POSTS;
 
   return (
     <>
-      <Nav/>
-      <div style={{minHeight:'100vh',background:'var(--c)',paddingTop:64}}>
+      <Nav />
+      <div style={{ minHeight: '100vh', background: 'var(--c)', paddingTop: 64 }}>
 
-        {/* Hero */}
-        <div style={{width:'100%',height:420,overflow:'hidden',position:'relative'}}>
-          <img src={post.img} alt={post.title} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
-          <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,.7) 0%,rgba(0,0,0,.2) 60%)'}}/>
-          <div style={{position:'absolute',bottom:40,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:760,padding:'0 24px'}}>
-            <div style={{display:'flex',gap:10,marginBottom:16}}>
-              <span style={{fontSize:'.72rem',fontWeight:700,color:'#fff',background:'var(--t)',padding:'4px 12px',borderRadius:50}}>{post.category}</span>
-              <span style={{fontSize:'.72rem',color:'rgba(255,255,255,.7)',padding:'4px 0'}}>{post.time}</span>
+        {/* Header */}
+        <section style={{ background: 'var(--c)', padding: '56px 24px 32px', textAlign: 'center' }}>
+          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <div style={{ fontSize: '.78rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--t)', marginBottom: 12 }}>
+              The Homeizz Blog
             </div>
-            <h1 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'clamp(1.6rem,4vw,2.6rem)',lineHeight:1.2}}>{post.title}</h1>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div style={{maxWidth:760,margin:'0 auto',padding:'48px 24px 80px'}}>
-          <Link href="/blog" style={{display:'inline-flex',alignItems:'center',gap:6,color:'var(--t)',fontWeight:600,fontSize:'.88rem',textDecoration:'none',marginBottom:32}}>
-            ← Back to Blog
-          </Link>
-
-          <p style={{fontSize:'1.1rem',color:'var(--tlt)',lineHeight:1.85,marginBottom:32,borderLeft:'3px solid var(--t)',paddingLeft:20,fontStyle:'italic'}}>
-            {post.excerpt}
-          </p>
-
-          <div style={{background:'#fff',borderRadius:16,padding:'32px',border:'1.5px solid var(--borderl)',marginBottom:32}}>
-            <p style={{color:'var(--tm)',lineHeight:1.85,fontSize:'.95rem'}}>
-              This is a detailed guide about <strong>{post.title}</strong>. Full article content coming soon. In the meantime, browse our verified professionals on Homeizz and find the perfect designer for your project.
+            <h1 style={{ fontFamily: 'var(--fd)', color: 'var(--b)', fontSize: 'clamp(2rem, 4.5vw, 3.2rem)', lineHeight: 1.1, marginBottom: 16, fontWeight: 600 }}>
+              Real guides for real Indian homes.
+            </h1>
+            <p style={{ color: 'var(--tm)', fontSize: 'clamp(1rem, 1.6vw, 1.1rem)', maxWidth: 600, margin: '0 auto', lineHeight: 1.65 }}>
+              Costs, designers, styles, and the questions you should ask before hiring. No fluff, no SEO spam.
             </p>
           </div>
+        </section>
 
-          <div style={{background:'var(--tpp)',borderRadius:16,padding:'28px 32px',border:'1.5px solid var(--t)',textAlign:'center'}}>
-            <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:8}}>Ready to find your designer?</h3>
-            <p style={{color:'var(--tlt)',fontSize:'.9rem',marginBottom:20}}>Browse verified architects and interior designers across India.</p>
-            <Link href="/browse" style={{display:'inline-flex',alignItems:'center',gap:8,padding:'12px 28px',background:'var(--t)',color:'#fff',borderRadius:50,fontWeight:700,fontSize:'.9rem',textDecoration:'none'}}>
-              Browse Designers →
+        {/* Featured post */}
+        {featured && (
+          <section style={{ padding: '24px 16px 40px', maxWidth: 1100, margin: '0 auto' }}>
+            <Link href={`/blog/${featured.slug}`} style={{ textDecoration: 'none', display: 'block', borderRadius: 20, overflow: 'hidden', background: '#fff', border: '1.5px solid var(--borderl)', boxShadow: 'var(--shm)' }}>
+              <div className="h-grid-2" style={{ gap: 0, alignItems: 'stretch' }}>
+                <div style={{ minHeight: 320, position: 'relative', overflow: 'hidden' }}>
+                  <img src={featured.img} alt={featured.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+                    <span style={{ background: 'var(--t)', color: '#fff', fontSize: '.7rem', fontWeight: 700, padding: '4px 12px', borderRadius: 50, letterSpacing: '.3px' }}>FEATURED</span>
+                    <span style={{ fontSize: '.78rem', color: 'var(--tlt)' }}>{featured.category} · {featured.time}</span>
+                  </div>
+                  <h2 style={{ fontFamily: 'var(--fd)', color: 'var(--b)', fontSize: 'clamp(1.5rem, 2.6vw, 2rem)', lineHeight: 1.2, marginBottom: 14, fontWeight: 600 }}>
+                    {featured.title}
+                  </h2>
+                  <p style={{ color: 'var(--tm)', fontSize: '.95rem', lineHeight: 1.7, marginBottom: 16 }}>
+                    {featured.excerpt}
+                  </p>
+                  <div style={{ color: 'var(--t)', fontWeight: 600, fontSize: '.9rem' }}>Read article →</div>
+                </div>
+              </div>
             </Link>
+          </section>
+        )}
+
+        {/* Other posts */}
+        <section style={{ padding: '8px 16px 80px', maxWidth: 1100, margin: '0 auto' }}>
+          <div className="h-grid-3" style={{ gap: 22 }}>
+            {rest.map(post => (
+              <Link key={post.slug} href={`/blog/${post.slug}`} style={{ textDecoration: 'none', display: 'block', background: '#fff', borderRadius: 16, overflow: 'hidden', border: '1.5px solid var(--borderl)', boxShadow: 'var(--sh)' }}>
+                <div style={{ height: 200, overflow: 'hidden' }}>
+                  <img src={post.img} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ padding: '20px 22px 22px' }}>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
+                    <span style={{ fontSize: '.68rem', fontWeight: 700, color: 'var(--t)', background: 'var(--tpp)', padding: '3px 9px', borderRadius: 50, letterSpacing: '.3px' }}>{post.category}</span>
+                    <span style={{ fontSize: '.7rem', color: 'var(--tlt)' }}>{post.time}</span>
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--fd)', color: 'var(--b)', fontSize: '1.15rem', lineHeight: 1.3, marginBottom: 8, fontWeight: 600 }}>
+                    {post.title}
+                  </h3>
+                  <p style={{ color: 'var(--tlt)', fontSize: '.85rem', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {post.excerpt}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
-        </div>
+
+          {/* CTA */}
+          <div style={{ marginTop: 56, background: 'var(--b)', borderRadius: 18, padding: '40px 32px', textAlign: 'center' }}>
+            <h2 style={{ fontFamily: 'var(--fd)', color: '#fff', fontSize: 'clamp(1.4rem, 2.5vw, 1.9rem)', marginBottom: 10, fontWeight: 600 }}>
+              Ready to find your designer?
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,.6)', fontSize: '.95rem', marginBottom: 22 }}>
+              Browse verified architects and interior designers across India. Free for homeowners.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/browse" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 28px', background: 'var(--t)', color: '#fff', borderRadius: 50, fontWeight: 700, fontSize: '.92rem', textDecoration: 'none' }}>
+                Browse Designers →
+              </Link>
+              <Link href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 28px', background: 'rgba(255,255,255,.08)', color: '#fff', borderRadius: 50, fontWeight: 600, fontSize: '.92rem', textDecoration: 'none', border: '1.5px solid rgba(255,255,255,.15)' }}>
+                I&apos;m a designer
+              </Link>
+            </div>
+          </div>
+        </section>
+
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 }

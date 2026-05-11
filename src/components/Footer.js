@@ -22,8 +22,8 @@ export default function Footer() {
         <div className="footer-col">
           <h4>Discover</h4>
           <Link href="/browse">Browse listings</Link>
-          <Link href="/architects/Mumbai/modern">Architects</Link>
-          <Link href="/interior-designer/Mumbai/modern">Interior designers</Link>
+          <Link href="/architects/mumbai/modern">Architects</Link>
+          <Link href="/interior-designer/mumbai/modular-kitchen">Interior designers</Link>
           <Link href="/blog">Design Blog</Link>
         </div>
 
@@ -33,7 +33,7 @@ export default function Footer() {
           <Link href="/pricing">Pricing</Link>
           <Link href="/auth">Sign in</Link>
           <Link href="/pro-dashboard">Dashboard</Link>
-          <Link href="/faq">FAQ</Link>
+          <Link href="/about">FAQ</Link>
         </div>
 
         <div className="footer-col">

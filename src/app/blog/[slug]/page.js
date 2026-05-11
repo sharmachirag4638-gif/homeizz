@@ -2,8 +2,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { POSTS, getPost, getRelatedPosts } from '@/lib/blog';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://homeizz.in';
+import { SITE_URL, absoluteUrl } from '@/lib/seo';
 
 export async function generateStaticParams() {
   return POSTS.map(p => ({ slug: p.slug }));
@@ -11,13 +10,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const post = getPost(params.slug);
-  if (!post) return { title: 'Post not found | Homeizz Blog' };
-  const url = `${SITE_URL}/blog/${post.slug}`;
+  if (!post) return { title: 'Post not found' };
+  const url = absoluteUrl(`/blog/${post.slug}`);
   return {
-    title: `${post.title} | Homeizz Blog`,
+    title: post.title,
     description: post.excerpt,
     keywords: post.keywords,
     alternates: { canonical: `/blog/${post.slug}` },
+    robots: post.Body ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: {
       type: 'article',
       title: post.title,
@@ -55,7 +55,7 @@ export default function BlogPostPage({ params }) {
 
   const Body = post.Body;
   const related = getRelatedPosts(post.slug);
-  const url = `${SITE_URL}/blog/${post.slug}`;
+  const url = absoluteUrl(`/blog/${post.slug}`);
 
   // Schema.org Article + FAQ JSON-LD for richer Google results
   const articleSchema = {
@@ -70,7 +70,7 @@ export default function BlogPostPage({ params }) {
     publisher: {
       '@type': 'Organization',
       name: 'Homeizz',
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
+      logo: { '@type': 'ImageObject', url: absoluteUrl('/favicon.svg') },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
   };

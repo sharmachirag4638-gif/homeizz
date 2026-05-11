@@ -1,24 +1,33 @@
 ﻿import Link from 'next/link';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import { SITE_URL, jsonLdScript } from '@/lib/seo';
 
 export const metadata = {
-  title: 'Homeizz — India Home Design Marketplace',
-  description: 'Discover verified architects and interior designers across India.',
+  title: 'Homeizz - Architects & Interior Designers in India',
+  description:
+    'Find verified architects, interior designers, modular kitchen experts, and ready-to-build home plans across India. Compare portfolios and request quotes.',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Homeizz - Architects & Interior Designers in India',
+    description:
+      'Discover verified architects, interior designers, modular kitchen experts, and home plans across India.',
+    url: SITE_URL,
+  },
 };
 
 const CITIES = [
-  { name: 'Mumbai', img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80' },
-  { name: 'Delhi', img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80' },
-  { name: 'Bangalore', img: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800&q=80' },
-  { name: 'Hyderabad', img: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80' },
-  { name: 'Chennai', img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&q=80' },
-  { name: 'Pune', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80' },
+  { slug: 'mumbai', name: 'Mumbai', img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=80' },
+  { slug: 'delhi', name: 'Delhi', img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=800&q=80' },
+  { slug: 'bangalore', name: 'Bangalore', img: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=800&q=80' },
+  { slug: 'hyderabad', name: 'Hyderabad', img: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80' },
+  { slug: 'chennai', name: 'Chennai', img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=800&q=80' },
+  { slug: 'pune', name: 'Pune', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80' },
 ];
 
 const CATEGORIES = [
-  { name: 'Architecture', desc: 'Award-winning architects', href: '/architects', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
-  { name: 'Interior Design', desc: 'Transform your spaces', href: '/interior-designer', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
+  { name: 'Architecture', desc: 'Award-winning architects', href: '/browse?type=architecture', img: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80' },
+  { name: 'Interior Design', desc: 'Transform your spaces', href: '/browse?type=interior', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=80' },
   { name: 'Home Plans', desc: 'Ready-to-build designs', href: '/browse?type=plan', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80' },
 ];
 
@@ -43,17 +52,55 @@ const STEPS = [
   { n: '03', title: 'Build with Confidence', desc: 'Choose your designer and start your dream project.' },
 ];
 
+const FAQS = [
+  {
+    q: 'How do I find architects near me on Homeizz?',
+    a: 'Start with your city, choose a design style, compare portfolios, and send enquiries to verified architects who match your budget and project type.',
+  },
+  {
+    q: 'Can I compare interior designer quotes?',
+    a: 'Yes. Homeizz is built so homeowners can shortlist multiple designers, review portfolios, and request quotes before choosing a professional.',
+  },
+  {
+    q: 'Is Homeizz available outside metro cities?',
+    a: 'Yes. Homeizz covers major Indian metros and expanding tier-2 cities for architecture, interiors, modular kitchens, and home plans.',
+  },
+];
+
+const homeJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/#webpage`,
+      url: SITE_URL,
+      name: 'Homeizz - Architects & Interior Designers in India',
+      description: metadata.description,
+      isPartOf: { '@id': `${SITE_URL}/#website` },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: FAQS.map(faq => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: { '@type': 'Answer', text: faq.a },
+      })),
+    },
+  ],
+};
+
 export default function HomePage() {
   return (
     <>
       <Nav />
+      <script {...jsonLdScript(homeJsonLd)} />
       <main>
         <section style={{height:'100vh',position:'relative',overflow:'hidden'}}>
-          <img src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1800&q=90" alt="Luxury home" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}}/>
+          <img src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1800&q=90" alt="Modern luxury home exterior in India" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'}}/>
           <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(0,0,0,.35) 0%,rgba(0,0,0,.15) 40%,rgba(0,0,0,.6) 100%)'}}/>
           <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',padding:'0 24px',zIndex:2}}>
             <h1 style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'clamp(2.8rem,6vw,5.5rem)',lineHeight:1.05,marginBottom:20,fontWeight:600}}>
-              Your dream home, designed by India's best.
+              Find architects and interior designers for your dream home.
             </h1>
             <p style={{color:'rgba(255,255,255,.85)',fontSize:'clamp(1rem,2vw,1.2rem)',maxWidth:540,marginBottom:40,lineHeight:1.7}}>
               Discover verified architects and interior designers. Compare portfolios, get quotes, and build with confidence.
@@ -128,8 +175,8 @@ export default function HomePage() {
             </div>
             <div className="h-grid-3" style={{gap:16}}>
               {CITIES.map(city=>(
-                <Link key={city.name} href={`/browse?city=${city.name}`} style={{textDecoration:'none',display:'block',borderRadius:16,overflow:'hidden',position:'relative',height:200}}>
-                  <img src={city.img} alt={city.name} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                <Link key={city.name} href={`/interior-designer/${city.slug}/modular-kitchen`} style={{textDecoration:'none',display:'block',borderRadius:16,overflow:'hidden',position:'relative',height:200}}>
+                  <img src={city.img} alt={`Interior designers in ${city.name}`} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
                   <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 60%)'}}/>
                   <div style={{position:'absolute',bottom:16,left:20}}>
                     <div style={{fontFamily:'var(--fd)',color:'#fff',fontSize:'1.4rem',fontWeight:600}}>{city.name}</div>
@@ -165,6 +212,25 @@ export default function HomePage() {
                     <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',fontSize:'1.1rem',lineHeight:1.3}}>{blog.title}</h3>
                   </div>
                 </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="h-sec" style={{background:'#fff'}}>
+          <div className="h-cont">
+            <div style={{textAlign:'center',marginBottom:36}}>
+              <h2 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:10}}>Questions homeowners ask before hiring</h2>
+              <p style={{color:'var(--tm)',fontSize:'.95rem',lineHeight:1.7,maxWidth:620,margin:'0 auto'}}>
+                Clear answers for comparing architects, interior designers, and home design quotes in India.
+              </p>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
+              {FAQS.map(faq => (
+                <div key={faq.q} style={{border:'1.5px solid var(--borderl)',borderRadius:16,padding:'22px',background:'#fff'}}>
+                  <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',fontSize:'1.15rem',lineHeight:1.35,marginBottom:10}}>{faq.q}</h3>
+                  <p style={{color:'var(--tm)',fontSize:'.9rem',lineHeight:1.7,margin:0}}>{faq.a}</p>
+                </div>
               ))}
             </div>
           </div>

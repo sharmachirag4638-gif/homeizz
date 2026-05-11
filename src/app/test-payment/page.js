@@ -39,7 +39,7 @@ export default function TestPaymentPage() {
         currency: order.currency,
         name: 'Homeizz',
         description: 'Test payment — verify integration',
-        image: '/logo.png',
+        image: '/favicon.svg',
         prefill: { name: 'Test User', email: 'test@homeizz.in', contact: '9999999999' },
         theme: { color: '#C4622D' },
         handler: async function (response) {
