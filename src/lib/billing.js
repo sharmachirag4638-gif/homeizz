@@ -47,7 +47,8 @@ export function getPlanEnvName(planId, interval = 'monthly') {
 
 export function getRazorpayPlanId(planId, interval = 'monthly') {
   const envName = getPlanEnvName(planId, interval);
-  return { envName, razorpayPlanId: envName ? process.env[envName] : null };
+  const razorpayPlanId = envName ? process.env[envName]?.trim() : null;
+  return { envName, razorpayPlanId };
 }
 
 export function planFromRazorpayPlanId(razorpayPlanId) {
@@ -92,10 +93,13 @@ export function subscriptionPatchFromRazorpay(subscription, overrides = {}) {
 }
 
 export function ensureRazorpayKeys() {
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim();
+  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
   if (!keyId || !keySecret) {
     throw new Error('Razorpay keys are not configured');
+  }
+  if (!keyId.startsWith('rzp_test_') && !keyId.startsWith('rzp_live_')) {
+    throw new Error('NEXT_PUBLIC_RAZORPAY_KEY_ID must start with rzp_test_ or rzp_live_');
   }
   return { keyId, keySecret };
 }
@@ -123,7 +127,10 @@ export async function razorpayRequest(path, { method = 'GET', body } = {}) {
   }
 
   if (!response.ok) {
-    const message = payload?.error?.description || payload?.error?.reason || payload?.error || 'Razorpay request failed';
+    const razorpayMessage = payload?.error?.description || payload?.error?.reason || payload?.error;
+    const message = response.status === 401
+      ? 'Razorpay authentication failed. In Vercel, check NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are copied from the same Razorpay account and same mode, then redeploy.'
+      : (razorpayMessage || 'Razorpay request failed');
     const error = new Error(message);
     error.status = response.status;
     error.payload = payload;
