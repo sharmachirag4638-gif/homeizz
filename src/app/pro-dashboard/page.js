@@ -25,9 +25,18 @@ const planDetails = Object.fromEntries(PLANS.map(plan => [
 ]));
 
 const SUBSCRIPTION_PROFILE_FIELDS = 'id, full_name, phone, user_type, plan, billing_interval, subscription_status, razorpay_subscription_id, razorpay_plan_id, subscription_current_start, subscription_current_end, subscription_cancel_at_cycle_end, subscription_cancelled_at, subscription_pending_plan, subscription_pending_interval';
+const LIVE_SUBSCRIPTION_STATUSES = ['authenticated', 'active'];
 
 function normalizeBillingInterval(interval) {
   return interval === 'annual' ? 'annual' : 'monthly';
+}
+
+function normalizeSubscriptionStatus(status) {
+  return String(status || 'inactive').trim().toLowerCase();
+}
+
+function hasLiveBilling(subscriptionId, status) {
+  return !!String(subscriptionId || '').trim() && LIVE_SUBSCRIPTION_STATUSES.includes(normalizeSubscriptionStatus(status));
 }
 
 function formatBillingDate(value) {
@@ -64,11 +73,20 @@ export default function ProDashboard(){
       ]);
       setListings(listingsRes.data||[]);
       setEnquiries(enquiriesRes.data||[]);
-      setProfile(profileRes.data||null);
+      let nextProfile = profileRes.data||null;
+      const metadata = data.user.user_metadata || {};
+      const currentSubscriptionId = nextProfile?.razorpay_subscription_id || metadata.razorpay_subscription_id;
+      const currentStatus = nextProfile?.subscription_status || metadata.subscription_status;
+      if(currentSubscriptionId && !hasLiveBilling(currentSubscriptionId, currentStatus)){
+        const syncRes = await fetch('/api/razorpay/sync-subscription', {method:'POST'});
+        const syncPayload = await syncRes.json().catch(()=>({}));
+        if(syncRes.ok && syncPayload.profile) nextProfile = syncPayload.profile;
+      }
+      setProfile(nextProfile);
       setBillingInterval(normalizeBillingInterval(
-        profileRes.data?.billing_interval ||
-        data.user.user_metadata?.billing_interval ||
-        data.user.user_metadata?.billing
+        nextProfile?.billing_interval ||
+        metadata.billing_interval ||
+        metadata.billing
       ));
       setLoading(false);
     });
@@ -125,7 +143,7 @@ export default function ProDashboard(){
       const metadata = user?.user_metadata||{};
       const subscriptionId = profile?.razorpay_subscription_id || metadata.razorpay_subscription_id;
       const status = profile?.subscription_status || metadata.subscription_status;
-      const canChangeExisting = !!subscriptionId && ['authenticated','active'].includes(status);
+      const canChangeExisting = hasLiveBilling(subscriptionId, status);
       const endpoint = canChangeExisting ? '/api/razorpay/change-subscription' : '/api/razorpay/create-subscription';
 
       const res = await fetch(endpoint, {
@@ -252,12 +270,12 @@ export default function ProDashboard(){
   const plan = account.plan||'growth';
   const currentPlan = planDetails[plan]||planDetails.growth;
   const activeBillingInterval = normalizeBillingInterval(account.billing_interval||account.billing);
-  const currentSubscriptionId = account.razorpay_subscription_id;
-  const subscriptionStatus = account.subscription_status || 'inactive';
+  const currentSubscriptionId = String(account.razorpay_subscription_id || '').trim();
+  const subscriptionStatus = normalizeSubscriptionStatus(account.subscription_status);
   const cancelAtCycleEnd = !!account.subscription_cancel_at_cycle_end;
   const pendingPlan = account.subscription_pending_plan;
   const pendingInterval = normalizeBillingInterval(account.subscription_pending_interval);
-  const hasPaidAccess = !!currentSubscriptionId && ['authenticated','active'].includes(subscriptionStatus);
+  const hasPaidAccess = hasLiveBilling(currentSubscriptionId, subscriptionStatus);
   const hasBillingSubscription = hasPaidAccess;
   const pendingPlanDetails = pendingPlan ? planDetails[pendingPlan] : null;
   const newEnquiries = enquiries.filter(e=>e.status==='new').length;
