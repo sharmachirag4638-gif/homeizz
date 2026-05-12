@@ -16,14 +16,6 @@ import {
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function trialStartTimestamp(user) {
-  const trialEnd = user?.user_metadata?.trial_end ? new Date(user.user_metadata.trial_end) : null;
-  if (!trialEnd || Number.isNaN(trialEnd.getTime())) return null;
-
-  const startsLaterThanNow = trialEnd.getTime() > Date.now() + 5 * 60 * 1000;
-  return startsLaterThanNow ? Math.floor(trialEnd.getTime() / 1000) : null;
-}
-
 function totalBillingCycles(interval) {
   return interval === 'annual' ? 10 : 120;
 }
@@ -90,7 +82,6 @@ export async function POST(req) {
       }).catch(() => null);
     }
 
-    const startAt = trialStartTimestamp(user);
     const subscriptionBody = {
       plan_id: razorpayPlanId,
       total_count: totalBillingCycles(billingInterval),
@@ -103,8 +94,6 @@ export async function POST(req) {
         homeizz_billing_interval: billingInterval,
       },
     };
-
-    if (startAt) subscriptionBody.start_at = startAt;
 
     const subscription = await razorpayRequest('/subscriptions', {
       method: 'POST',
@@ -140,7 +129,7 @@ export async function POST(req) {
       billingInterval,
       amount: getPlanPrice(targetPlanId, billingInterval),
       status: subscription.status,
-      startAt: subscription.start_at || startAt,
+      startAt: subscription.start_at,
     });
   } catch (error) {
     console.error('[razorpay/create-subscription]', error);

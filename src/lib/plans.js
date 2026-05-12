@@ -71,4 +71,4 @@ export const PLANS = [
   },
 ];
 
-export const TRIAL_DAYS = 90;
+export const LAUNCH_OFFER_LIMIT = 100;

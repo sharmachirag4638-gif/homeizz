@@ -250,13 +250,11 @@ export default function ProDashboard(){
   const displayName = account.full_name||'Professional';
   const initials = displayName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   const plan = account.plan||'growth';
-  const trialEnd = meta.trial_end ? new Date(meta.trial_end) : null;
-  const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd - new Date()) / (1000*60*60*24))) : 0;
-  const isTrialActive = !!trialEnd && daysLeft > 0;
   const currentPlan = planDetails[plan]||planDetails.growth;
   const activeBillingInterval = normalizeBillingInterval(account.billing_interval||account.billing);
-  const subscriptionStatus = account.subscription_status || (isTrialActive ? 'trialing' : 'inactive');
   const currentSubscriptionId = account.razorpay_subscription_id;
+  const launchOfferActive = account.launch_offer === 'first_100_listers' && !currentSubscriptionId;
+  const subscriptionStatus = account.subscription_status || (launchOfferActive ? 'launch_offer' : 'inactive');
   const cancelAtCycleEnd = !!account.subscription_cancel_at_cycle_end;
   const pendingPlan = account.subscription_pending_plan;
   const pendingInterval = normalizeBillingInterval(account.subscription_pending_interval);
@@ -283,16 +281,6 @@ export default function ProDashboard(){
             <div style={{fontSize:'.68rem',color:'rgba(255,255,255,.35)',marginTop:1}}>{meta.pro_type||'Professional'}</div>
           </div>
         </div>
-
-        {isTrialActive&&(
-          <div style={{margin:'12px 16px',background:'rgba(107,127,94,.2)',border:'1px solid rgba(107,127,94,.35)',borderRadius:10,padding:'10px 14px'}}>
-            <div style={{color:'#A8C89A',fontSize:'.7rem',fontWeight:700,marginBottom:3}}>🎉 FREE TRIAL</div>
-            <div style={{color:'rgba(255,255,255,.65)',fontSize:'.78rem'}}>{daysLeft} days remaining</div>
-            <div style={{height:3,background:'rgba(255,255,255,.1)',borderRadius:2,marginTop:8}}>
-              <div style={{height:'100%',background:'#6B7F5E',borderRadius:2,width:`${(daysLeft/90)*100}%`}}/>
-            </div>
-          </div>
-        )}
 
         <nav style={{padding:'8px 0',flex:1,overflowY:'auto'}}>
           <div style={{fontSize:'.58rem',fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:'rgba(255,255,255,.18)',padding:'14px 24px 6px'}}>MENU</div>
@@ -367,7 +355,7 @@ export default function ProDashboard(){
                 {label:'Total Listings',value:listings.length,icon:'🖼️',color:'#C4622D',sub:`of ${currentPlan.listings} allowed`},
                 {label:'New Enquiries',value:newEnquiries,icon:'💬',color:'#6B7F5E',sub:'unread'},
                 {label:'Total Enquiries',value:enquiries.length,icon:'📨',color:'#B8860B',sub:'all time'},
-                {label:'Trial Days Left',value:isTrialActive?daysLeft:'—',icon:'⏳',color:'#2D7D6B',sub:isTrialActive?'days free':'subscription active'},
+                {label:'Billing Status',value:subscriptionStatus.replaceAll('_',' '),icon:'💳',color:'#2D7D6B',sub:activeBillingInterval},
               ].map(stat=>(
                 <div key={stat.label} style={{background:'#fff',borderRadius:16,padding:'20px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
@@ -386,21 +374,10 @@ export default function ProDashboard(){
                   <h3 style={{fontFamily:'var(--fd)',color:'var(--b)'}}>Your Plan</h3>
                   <span style={{background:currentPlan.color,color:'#fff',fontSize:'.7rem',fontWeight:700,padding:'4px 12px',borderRadius:50}}>{currentPlan.name}</span>
                 </div>
-                {isTrialActive?(
-                  <div>
-                    <div style={{fontFamily:'var(--fd)',fontSize:'2.5rem',fontWeight:700,color:'#6B7F5E',lineHeight:1}}>FREE</div>
-                    <div style={{color:'var(--tlt)',fontSize:'.82rem',marginBottom:14,marginTop:4}}>Trial ends in {daysLeft} days</div>
-                    <div style={{height:6,background:'var(--borderl)',borderRadius:3,marginBottom:8}}>
-                      <div style={{height:'100%',background:'#6B7F5E',borderRadius:3,width:`${(daysLeft/90)*100}%`}}/>
-                    </div>
-                    <div style={{fontSize:'.75rem',color:'var(--tlt)'}}>After trial: {currentPlan.price}</div>
-                  </div>
-                ):(
-                  <div>
-                    <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:currentPlan.color}}>{currentPlan.price}</div>
-                    <div style={{color:'var(--tlt)',fontSize:'.82rem',marginTop:4}}>Active subscription</div>
-                  </div>
-                )}
+                <div>
+                  <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:currentPlan.color}}>{currentPlan.price}</div>
+                  <div style={{color:'var(--tlt)',fontSize:'.82rem',marginTop:4}}>{launchOfferActive?'Launch offer active':hasBillingSubscription?'Active subscription':'Billing not connected'}</div>
+                </div>
                 <button onClick={()=>setTab('subscription')} style={{marginTop:16,width:'100%',padding:'10px',border:`1.5px solid ${currentPlan.color}`,borderRadius:10,background:'transparent',color:currentPlan.color,fontWeight:600,cursor:'pointer',fontSize:'.85rem'}}>
                   Manage Plan →
                 </button>
@@ -641,8 +618,8 @@ export default function ProDashboard(){
                 {cancelAtCycleEnd&&(
                   <div style={{marginTop:8,color:'#92400E',fontSize:'.82rem',fontWeight:600}}>Cancellation scheduled. Listings stay active until the current period ends.</div>
                 )}
-                {isTrialActive&&!hasBillingSubscription&&(
-                  <div style={{marginTop:8,color:'var(--tlt)',fontSize:'.82rem'}}>Trial has {daysLeft} days left. Set up Razorpay now and billing starts after trial.</div>
+                {launchOfferActive&&!hasBillingSubscription&&(
+                  <div style={{marginTop:8,color:'var(--tlt)',fontSize:'.82rem'}}>Launch offer active. Set up Razorpay only when you are ready to activate paid billing.</div>
                 )}
               </div>
               {hasBillingSubscription&&!cancelAtCycleEnd&&(
@@ -674,8 +651,8 @@ export default function ProDashboard(){
                     ? 'Current Plan'
                     : hasBillingSubscription
                       ? `Switch to ${p.name}`
-                      : isTrialActive
-                        ? (isCurrentPlan ? 'Set up billing' : `Switch to ${p.name}`)
+                      : launchOfferActive
+                        ? (isCurrentPlan ? 'Activate billing' : `Activate ${p.name}`)
                         : `Subscribe to ${p.name}`;
                 return(
                   <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${isCurrentPlan?p.color:'var(--borderl)'}`,position:'relative'}}>

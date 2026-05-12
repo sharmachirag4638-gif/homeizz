@@ -166,8 +166,8 @@ export default function ProSignup(){
         bio, instagram, website,
         google_business:googleBusiness,
         plan:selectedPlan, billing,
-        trial_start:new Date().toISOString(),
-        trial_end:new Date(Date.now()+90*24*60*60*1000).toISOString(),
+        launch_offer:'first_100_listers',
+        launch_offer_claimed_at:new Date().toISOString(),
       }},
     });
     if(error) throw error;
@@ -217,7 +217,7 @@ export default function ProSignup(){
           {step===1&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Create your account</h2>
-              <p style={{marginBottom:28,fontSize:'.9rem'}}>Start your free 3-month trial - no credit card needed now</p>
+              <p style={{marginBottom:28,fontSize:'.9rem'}}>Claim your free launch spot - no credit card needed now</p>
               <div style={{display:'flex',flexDirection:'column',gap:16}}>
                 <Field label="Email address" type="email" value={email} onChange={setEmail} placeholder="you@example.com"/>
                 <Field label="Phone number" type="tel" value={phone} onChange={setPhone} placeholder="Enter your phone number"/>
@@ -363,13 +363,13 @@ export default function ProSignup(){
           {step===7&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Choose Your Plan</h2>
-              <p style={{marginBottom:20,fontSize:'.9rem'}}>Start free for 3 months — no card needed now</p>
+              <p style={{marginBottom:20,fontSize:'.9rem'}}>First 100 listers get free launch access - no card needed now</p>
 
               <div style={{background:'linear-gradient(135deg,#6B7F5E,#4A6040)',borderRadius:12,padding:'14px 20px',marginBottom:20,display:'flex',alignItems:'center',gap:12}}>
                 <span style={{fontSize:'1.5rem'}}>🎉</span>
                 <div>
-                  <div style={{color:'#fff',fontWeight:700,fontSize:'.9rem'}}>3 Months FREE Trial</div>
-                  <div style={{color:'rgba(255,255,255,.8)',fontSize:'.78rem'}}>No credit card needed. First charge after 90 days.</div>
+                  <div style={{color:'#fff',fontWeight:700,fontSize:'.9rem'}}>First 100 Listers Launch Offer</div>
+                  <div style={{color:'rgba(255,255,255,.8)',fontSize:'.78rem'}}>No credit card needed. Add your profile and listings during launch.</div>
                 </div>
               </div>
 
@@ -421,7 +421,7 @@ export default function ProSignup(){
             {step<7
               ?<button onClick={nextStep} style={{flex:2,padding:'14px',border:'none',borderRadius:12,background:'var(--t)',color:'#fff',fontWeight:700,cursor:'pointer',fontSize:'.95rem',boxShadow:'0 6px 20px rgba(196,98,45,.3)'}}>Continue</button>
               :<button onClick={submit} disabled={busy} style={{flex:2,padding:'14px',border:'none',borderRadius:12,background:busy?'var(--borderl)':'var(--t)',color:'#fff',fontWeight:700,cursor:busy?'not-allowed':'pointer',fontSize:'.95rem'}}>
-                {busy?'Setting up...':'Start Free Trial'}
+                {busy?'Setting up...':'Claim Founding Spot'}
               </button>
             }
           </div>
