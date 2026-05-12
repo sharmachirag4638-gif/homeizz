@@ -24,7 +24,7 @@ const planDetails = Object.fromEntries(PLANS.map(plan => [
   },
 ]));
 
-const SUBSCRIPTION_PROFILE_FIELDS = 'id, full_name, phone, user_type, role, plan, billing_interval, subscription_status, razorpay_subscription_id, razorpay_plan_id, subscription_current_start, subscription_current_end, subscription_cancel_at_cycle_end, subscription_cancelled_at, subscription_pending_plan, subscription_pending_interval';
+const SUBSCRIPTION_PROFILE_FIELDS = 'id, full_name, phone, user_type, plan, billing_interval, subscription_status, razorpay_subscription_id, razorpay_plan_id, subscription_current_start, subscription_current_end, subscription_cancel_at_cycle_end, subscription_cancelled_at, subscription_pending_plan, subscription_pending_interval';
 
 function normalizeBillingInterval(interval) {
   return interval === 'annual' ? 'annual' : 'monthly';

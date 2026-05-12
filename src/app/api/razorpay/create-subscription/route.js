@@ -23,7 +23,7 @@ function totalBillingCycles(interval) {
 async function getProfile(admin, userId) {
   const { data } = await admin
     .from('profiles')
-    .select('id, full_name, phone, user_type, role, plan, billing_interval, subscription_status, razorpay_subscription_id, razorpay_plan_id')
+    .select('id, full_name, phone, user_type, plan, billing_interval, subscription_status, razorpay_subscription_id, razorpay_plan_id')
     .eq('id', userId)
     .single();
   return data || null;
