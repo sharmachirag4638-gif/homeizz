@@ -194,7 +194,9 @@ export default function ProDashboard(){
             const verifyPayload = await verifyRes.json().catch(()=>({}));
             if(!verifyRes.ok || !verifyPayload.ok) throw new Error(verifyPayload.error||'Subscription verification failed');
             await refreshBillingState();
-            setBillingMessage('Subscription verified. Your billing is connected.');
+            setTab('overview');
+            setBillingMessage('Subscription verified. Opening your dashboard...');
+            window.location.assign('/pro-dashboard');
           }catch(e){
             setBillingError(e.message||'Subscription verification failed');
           }finally{
