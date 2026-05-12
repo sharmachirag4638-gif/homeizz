@@ -62,11 +62,11 @@ const STEPS = [
 const labelStyle = {display:'block',fontSize:'.82rem',fontWeight:600,color:'var(--b)',marginBottom:6};
 const inputStyle = {width:'100%',padding:'12px 14px',border:'1.5px solid var(--borderl)',borderRadius:10,fontSize:'.9rem',color:'var(--b)',background:'#fff',outline:'none',fontFamily:'var(--fb)'};
 
-function Field({label,type='text',value,onChange,placeholder}){
+function Field({label,type='text',value,onChange,placeholder,disabled=false}){
   return(
     <div>
       <label style={labelStyle}>{label}</label>
-      <input type={type} value={value} placeholder={placeholder} onChange={e=>onChange(e.target.value)} style={inputStyle}/>
+      <input type={type} value={value} placeholder={placeholder} disabled={disabled} onChange={e=>onChange(e.target.value)} style={{...inputStyle,opacity:disabled ? .75 : 1,cursor:disabled?'not-allowed':'text'}}/>
     </div>
   );
 }
@@ -90,6 +90,7 @@ export default function ProSignup(){
   const [busy,setBusy] = useState(false);
   const [err,setErr] = useState('');
   const [billing,setBilling] = useState('monthly');
+  const [existingUser,setExistingUser] = useState(null);
 
   const [email,setEmail] = useState('');
   const [phone,setPhone] = useState('');
@@ -119,6 +120,22 @@ export default function ProSignup(){
   const [googleBusiness,setGoogleBusiness] = useState('');
   const [selectedPlan,setSelectedPlan] = useState('growth');
 
+  useEffect(()=>{
+    sb.auth.getUser().then(({data})=>{
+      const currentUser = data?.user;
+      if(!currentUser) return;
+      if(currentUser.user_metadata?.role === 'professional'){
+        router.push('/pro-dashboard?billing=1');
+        return;
+      }
+      setExistingUser(currentUser);
+      const meta = currentUser.user_metadata || {};
+      setEmail(currentUser.email || '');
+      setPhone(meta.phone || '');
+      setName(meta.full_name || '');
+    });
+  },[]);
+
   function toggleOtherCity(city){setOtherCities(prev=>prev.includes(city)?prev.filter(c=>c!==city):[...prev,city]);}
   function toggleStyle(s){setStyles(prev=>prev.includes(s)?prev.filter(x=>x!==s):[...prev,s]);}
   function toggleProjectType(t){setProjectTypes(prev=>prev.includes(t)?prev.filter(x=>x!==t):[...prev,t]);}
@@ -126,9 +143,9 @@ export default function ProSignup(){
   function nextStep(){
     setErr('');
     if(step===1){
-      if(!email||!phone||!password||!confirmPassword) return setErr('Please fill all fields');
-      if(password!==confirmPassword) return setErr('Passwords do not match');
-      if(password.length<8) return setErr('Password must be at least 8 characters');
+      if(!email||!phone||(!existingUser&&(!password||!confirmPassword))) return setErr('Please fill all fields');
+      if(!existingUser&&password!==confirmPassword) return setErr('Passwords do not match');
+      if(!existingUser&&password.length<8) return setErr('Password must be at least 8 characters');
     }
     if(step===2){
       if(!profileType) return setErr('Please select Individual or Firm');
@@ -148,25 +165,46 @@ export default function ProSignup(){
     const displayName = profileType==='individual'?name:companyName;
     const allStyles = otherStyle.trim() ? [...styles, otherStyle.trim()] : styles;
     const allProjectTypes = otherProjectType.trim() ? [...projectTypes, otherProjectType.trim()] : projectTypes;
+    const professionalData = {
+      full_name:displayName, phone, role:'professional',
+      profile_type:profileType,
+      pan:profileType==='individual'?pan:null,
+      company_name:profileType==='firm'?companyName:null,
+      gst:profileType==='firm'?gst:null,
+      contact_person:profileType==='firm'?contactPerson:null,
+      pro_type:proType, experience,
+      projects_completed:projectsCompleted,
+      avg_completion_time:avgCompletionTime,
+      min_budget:minBudget, primary_city:primaryCity,
+      other_cities:otherCities, pan_india:panIndia,
+      styles:allStyles, project_types:allProjectTypes,
+      bio, instagram, website,
+      google_business:googleBusiness,
+      plan:selectedPlan, billing,
+      billing_interval:billing,
+    };
+
+    if(existingUser){
+      const { error:updateError } = await sb.auth.updateUser({ data: professionalData });
+      if(updateError) throw updateError;
+
+      const { error:profileError } = await sb.from('profiles').upsert({
+        id: existingUser.id,
+        full_name: displayName,
+        phone,
+        user_type: 'professional',
+        plan: selectedPlan,
+        billing_interval: billing,
+      }, { onConflict: 'id' });
+      if(profileError) throw profileError;
+
+      router.push('/pro-dashboard?billing=1');
+      return;
+    }
+
     const {data, error} = await sb.auth.signUp({
       email, password,
-      options:{data:{
-        full_name:displayName, phone, role:'professional',
-        profile_type:profileType,
-        pan:profileType==='individual'?pan:null,
-        company_name:profileType==='firm'?companyName:null,
-        gst:profileType==='firm'?gst:null,
-        contact_person:profileType==='firm'?contactPerson:null,
-        pro_type:proType, experience,
-        projects_completed:projectsCompleted,
-        avg_completion_time:avgCompletionTime,
-        min_budget:minBudget, primary_city:primaryCity,
-        other_cities:otherCities, pan_india:panIndia,
-        styles:allStyles, project_types:allProjectTypes,
-        bio, instagram, website,
-        google_business:googleBusiness,
-        plan:selectedPlan, billing,
-      }},
+      options:{data:professionalData},
     });
     if(error) throw error;
     if(data?.user?.identities?.length === 0){
@@ -215,12 +253,21 @@ export default function ProSignup(){
           {step===1&&(
             <div>
               <h2 style={{marginBottom:6,fontFamily:'var(--fd)'}}>Create your account</h2>
-              <p style={{marginBottom:28,fontSize:'.9rem'}}>Create your professional profile and choose a plan</p>
+              <p style={{marginBottom:28,fontSize:'.9rem'}}>{existingUser?'Upgrade this account to a professional profile':'Create your professional profile and choose a plan'}</p>
+              {existingUser&&(
+                <div style={{background:'var(--tpp)',border:'1.5px solid var(--tp)',borderRadius:12,padding:'12px 14px',marginBottom:18,fontSize:'.84rem',color:'var(--tm)'}}>
+                  Signed in as {existingUser.email}. This account will become your professional account after billing is completed.
+                </div>
+              )}
               <div style={{display:'flex',flexDirection:'column',gap:16}}>
-                <Field label="Email address" type="email" value={email} onChange={setEmail} placeholder="you@example.com"/>
+                <Field label="Email address" type="email" value={email} onChange={setEmail} placeholder="you@example.com" disabled={!!existingUser}/>
                 <Field label="Phone number" type="tel" value={phone} onChange={setPhone} placeholder="Enter your phone number"/>
-                <Field label="Password" type="password" value={password} onChange={setPassword} placeholder="Min 8 characters"/>
-                <Field label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat password"/>
+                {!existingUser&&(
+                  <>
+                    <Field label="Password" type="password" value={password} onChange={setPassword} placeholder="Min 8 characters"/>
+                    <Field label="Confirm Password" type="password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat password"/>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -419,11 +466,11 @@ export default function ProSignup(){
             {step<7
               ?<button onClick={nextStep} style={{flex:2,padding:'14px',border:'none',borderRadius:12,background:'var(--t)',color:'#fff',fontWeight:700,cursor:'pointer',fontSize:'.95rem',boxShadow:'0 6px 20px rgba(196,98,45,.3)'}}>Continue</button>
               :<button onClick={submit} disabled={busy} style={{flex:2,padding:'14px',border:'none',borderRadius:12,background:busy?'var(--borderl)':'var(--t)',color:'#fff',fontWeight:700,cursor:busy?'not-allowed':'pointer',fontSize:'.95rem'}}>
-                {busy?'Setting up...':'Create Professional Account'}
+                {busy?'Setting up...':existingUser?'Upgrade Account & Continue to Billing':'Create Account & Continue to Billing'}
               </button>
             }
           </div>
-          {step===1&&<p style={{textAlign:'center',marginTop:20,fontSize:'.82rem',color:'var(--tlt)'}}>Already have an account? <span onClick={()=>router.push('/auth')} style={{color:'var(--t)',fontWeight:600,cursor:'pointer'}}>Sign in</span></p>}
+          {step===1&&!existingUser&&<p style={{textAlign:'center',marginTop:20,fontSize:'.82rem',color:'var(--tlt)'}}>Already have an account? <span onClick={()=>router.push('/auth')} style={{color:'var(--t)',fontWeight:600,cursor:'pointer'}}>Sign in</span></p>}
         </div>
       </div>
     </div>

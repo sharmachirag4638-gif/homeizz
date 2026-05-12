@@ -71,9 +71,20 @@ export default function AddListing() {
   const [photoPreviews, setPhotoPreviews] = useState([]);
 
   useEffect(() => {
-    sb.auth.getUser().then(({ data }) => {
+    sb.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/auth'); return; }
-      if (data.user.user_metadata?.role !== 'professional') { router.push('/'); return; }
+      if (data.user.user_metadata?.role !== 'professional') { router.push('/pro-signup?upgrade=1'); return; }
+
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('subscription_status, razorpay_subscription_id')
+        .eq('id', data.user.id)
+        .single();
+      const hasPaidAccess =
+        !!profile?.razorpay_subscription_id &&
+        ['authenticated', 'active'].includes(profile?.subscription_status);
+      if (!hasPaidAccess) { router.push('/pro-dashboard?billing=1'); return; }
+
       setUser(data.user);
     });
   }, []);

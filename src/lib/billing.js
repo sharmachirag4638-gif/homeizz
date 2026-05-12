@@ -4,7 +4,7 @@ export const BILLING_INTERVALS = ['monthly', 'annual'];
 
 export const TERMINAL_SUBSCRIPTION_STATUSES = ['cancelled', 'completed', 'expired'];
 export const CHANGEABLE_SUBSCRIPTION_STATUSES = ['authenticated', 'active'];
-export const BILLING_LIVE_STATUSES = ['authenticated', 'active', 'pending', 'halted'];
+export const BILLING_LIVE_STATUSES = ['authenticated', 'active'];
 
 const RAZORPAY_PLAN_ENV = {
   starter: {

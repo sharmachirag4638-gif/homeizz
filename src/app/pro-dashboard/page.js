@@ -54,7 +54,7 @@ export default function ProDashboard(){
   useEffect(()=>{
     sb.auth.getUser().then(async({data})=>{
       if(!data.user){router.push('/auth');return;}
-      if(data.user.user_metadata?.role!=='professional'){router.push('/');return;}
+      if(data.user.user_metadata?.role!=='professional'){router.push('/pro-signup?upgrade=1');return;}
       setUser(data.user);
       // Fetch listings, enquiries, and billing profile in parallel.
       const [listingsRes, enquiriesRes, profileRes] = await Promise.all([
@@ -257,9 +257,70 @@ export default function ProDashboard(){
   const cancelAtCycleEnd = !!account.subscription_cancel_at_cycle_end;
   const pendingPlan = account.subscription_pending_plan;
   const pendingInterval = normalizeBillingInterval(account.subscription_pending_interval);
-  const hasBillingSubscription = !!currentSubscriptionId && ['authenticated','active','pending','halted'].includes(subscriptionStatus);
+  const hasPaidAccess = !!currentSubscriptionId && ['authenticated','active'].includes(subscriptionStatus);
+  const hasBillingSubscription = hasPaidAccess;
   const pendingPlanDetails = pendingPlan ? planDetails[pendingPlan] : null;
   const newEnquiries = enquiries.filter(e=>e.status==='new').length;
+
+  if(!hasPaidAccess) return(
+    <div style={{minHeight:'100vh',background:'#F5F0EB',padding:'40px 20px'}}>
+      <div style={{maxWidth:980,margin:'0 auto'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:16,marginBottom:28}}>
+          <div style={{fontFamily:'var(--fd)',fontSize:'1.6rem',fontWeight:700,color:'var(--t)',cursor:'pointer'}} onClick={()=>router.push('/')}>
+            Home<span style={{color:'var(--b)'}}>izz</span>
+          </div>
+          <button onClick={signOut} style={{padding:'10px 16px',border:'1.5px solid var(--borderl)',borderRadius:10,background:'#fff',color:'var(--tm)',fontWeight:700,cursor:'pointer',fontSize:'.85rem'}}>
+            Sign Out
+          </button>
+        </div>
+
+        <div style={{background:'#fff',borderRadius:18,padding:'30px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)',marginBottom:22}}>
+          <div style={{fontSize:'.72rem',fontWeight:800,letterSpacing:'1.2px',textTransform:'uppercase',color:'var(--t)',marginBottom:10}}>Billing required</div>
+          <h1 style={{fontFamily:'var(--fd)',color:'var(--b)',fontSize:'2rem',marginBottom:8}}>Complete billing to open your professional dashboard</h1>
+          <p style={{color:'var(--tm)',fontSize:'.95rem',lineHeight:1.7,maxWidth:720}}>
+            Your professional profile is saved, but listings, enquiries, and dashboard tools unlock only after a Razorpay subscription is active.
+          </p>
+          {billingError&&<div style={{background:'#FEF2F2',border:'1px solid #FECACA',color:'#DC2626',borderRadius:10,padding:'12px 16px',marginTop:18,fontSize:'.85rem',fontWeight:600}}>{billingError}</div>}
+          {billingMessage&&<div style={{background:'#ECFDF5',border:'1px solid #A7F3D0',color:'#065F46',borderRadius:10,padding:'12px 16px',marginTop:18,fontSize:'.85rem',fontWeight:600}}>{billingMessage}</div>}
+        </div>
+
+        <div style={{display:'flex',justifyContent:'center',marginBottom:22}}>
+          <div style={{display:'inline-flex',background:'#fff',border:'1.5px solid var(--borderl)',borderRadius:50,padding:4,gap:4}}>
+            <button onClick={()=>setBillingInterval('monthly')} style={{border:'none',borderRadius:50,padding:'8px 18px',fontWeight:700,cursor:'pointer',background:billingInterval==='monthly'?'var(--t)':'transparent',color:billingInterval==='monthly'?'#fff':'var(--tlt)'}}>Monthly</button>
+            <button onClick={()=>setBillingInterval('annual')} style={{border:'none',borderRadius:50,padding:'8px 18px',fontWeight:700,cursor:'pointer',background:billingInterval==='annual'?'var(--t)':'transparent',color:billingInterval==='annual'?'#fff':'var(--tlt)'}}>Annual</button>
+          </div>
+        </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}}>
+          {PLANS.map(p=>{
+            const price = billingInterval==='annual' ? p.annualMonthly : p.monthly;
+            const isCurrentPlan = plan===p.id;
+            return(
+              <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${isCurrentPlan?p.color:'var(--borderl)'}`,position:'relative',boxShadow:'var(--sh)'}}>
+                {p.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:p.color,color:'#fff',fontSize:'.68rem',fontWeight:700,padding:'3px 12px',borderRadius:50}}>MOST POPULAR</div>}
+                <h3 style={{fontFamily:'var(--fd)',color:'var(--b)',marginBottom:4}}>{p.name}</h3>
+                <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:p.color}}>Rs {price.toLocaleString('en-IN')}<span style={{fontSize:'.9rem',fontWeight:400,color:'var(--tlt)'}}>/mo</span></div>
+                <div style={{fontSize:'.75rem',color:'var(--sage)',marginBottom:16,fontWeight:600}}>
+                  {billingInterval==='annual' ? `Rs ${p.annual.toLocaleString('en-IN')}/yr - billed yearly` : `Rs ${p.monthly.toLocaleString('en-IN')}/mo - billed monthly`}
+                </div>
+                <div style={{display:'flex',flexDirection:'column',gap:7,marginBottom:20,paddingTop:14,borderTop:'1px solid var(--borderl)'}}>
+                  {p.features.map((f,i)=>(
+                    <div key={i} style={{fontSize:'.78rem',color:'var(--tm)',display:'flex',alignItems:'flex-start',gap:6,lineHeight:1.4}}>
+                      <span style={{color:p.color,fontWeight:700,flexShrink:0}}>✓</span>
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={()=>startOrChangeSubscription(p.id)} disabled={!!billingBusy} style={{width:'100%',padding:'11px',border:`2px solid ${p.color}`,borderRadius:10,background:isCurrentPlan?p.color:'transparent',color:isCurrentPlan?'#fff':p.color,fontWeight:700,cursor:billingBusy?'not-allowed':'pointer',fontSize:'.85rem',opacity:billingBusy ? .85 : 1}}>
+                  {billingBusy===p.id?'Opening billing...':`Subscribe to ${p.name}`}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 
   return(
     <div style={{display:'flex',minHeight:'100vh',background:'#F5F0EB'}}>
