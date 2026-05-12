@@ -20,7 +20,7 @@ export default function RefundPage() {
         <div style={{maxWidth:800,margin:'0 auto',padding:'48px 44px 80px'}}>
           <div style={{background:'#fff',borderRadius:20,padding:'40px',border:'1.5px solid var(--borderl)',boxShadow:'var(--sh)'}}>
             {[
-              {title:'1. Launch Offer',content:'During launch, the first 100 professional listers may receive free access without entering card details at signup. No subscription charge is created unless you activate a paid plan.'},
+              {title:'1. Subscription Charges',content:'Professional subscriptions are billed monthly or annually through Razorpay after you activate a paid plan. Charges follow the plan and billing interval selected in your dashboard.'},
               {title:'2. Subscription Cancellation',content:'You can cancel your subscription at any time from your dashboard. Your listing will remain active until the end of the current billing period. No refunds are provided for the remaining days of the current billing period.'},
               {title:'3. Refund Eligibility',content:'Refunds are only considered in the following cases: double charges due to technical errors, charges after a confirmed cancellation, or unauthorized transactions. All refund requests must be submitted within 7 days of the charge.'},
               {title:'4. How to Request a Refund',content:'To request a refund, email us at hello@homeizz.in with your registered email address, transaction ID, and reason for the refund. We will review and respond within 3-5 business days.'},

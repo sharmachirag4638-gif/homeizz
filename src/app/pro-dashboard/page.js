@@ -253,8 +253,7 @@ export default function ProDashboard(){
   const currentPlan = planDetails[plan]||planDetails.growth;
   const activeBillingInterval = normalizeBillingInterval(account.billing_interval||account.billing);
   const currentSubscriptionId = account.razorpay_subscription_id;
-  const launchOfferActive = account.launch_offer === 'first_100_listers' && !currentSubscriptionId;
-  const subscriptionStatus = account.subscription_status || (launchOfferActive ? 'launch_offer' : 'inactive');
+  const subscriptionStatus = account.subscription_status || 'inactive';
   const cancelAtCycleEnd = !!account.subscription_cancel_at_cycle_end;
   const pendingPlan = account.subscription_pending_plan;
   const pendingInterval = normalizeBillingInterval(account.subscription_pending_interval);
@@ -376,7 +375,7 @@ export default function ProDashboard(){
                 </div>
                 <div>
                   <div style={{fontFamily:'var(--fd)',fontSize:'2rem',fontWeight:700,color:currentPlan.color}}>{currentPlan.price}</div>
-                  <div style={{color:'var(--tlt)',fontSize:'.82rem',marginTop:4}}>{launchOfferActive?'Launch offer active':hasBillingSubscription?'Active subscription':'Billing not connected'}</div>
+                  <div style={{color:'var(--tlt)',fontSize:'.82rem',marginTop:4}}>{hasBillingSubscription?'Active subscription':'Billing not connected'}</div>
                 </div>
                 <button onClick={()=>setTab('subscription')} style={{marginTop:16,width:'100%',padding:'10px',border:`1.5px solid ${currentPlan.color}`,borderRadius:10,background:'transparent',color:currentPlan.color,fontWeight:600,cursor:'pointer',fontSize:'.85rem'}}>
                   Manage Plan →
@@ -618,9 +617,6 @@ export default function ProDashboard(){
                 {cancelAtCycleEnd&&(
                   <div style={{marginTop:8,color:'#92400E',fontSize:'.82rem',fontWeight:600}}>Cancellation scheduled. Listings stay active until the current period ends.</div>
                 )}
-                {launchOfferActive&&!hasBillingSubscription&&(
-                  <div style={{marginTop:8,color:'var(--tlt)',fontSize:'.82rem'}}>Launch offer active. Set up Razorpay only when you are ready to activate paid billing.</div>
-                )}
               </div>
               {hasBillingSubscription&&!cancelAtCycleEnd&&(
                 <button onClick={cancelSubscription} disabled={!!billingBusy} style={{padding:'10px 16px',border:'1.5px solid #FECACA',borderRadius:10,background:'#fff',color:'#DC2626',fontWeight:700,cursor:billingBusy?'not-allowed':'pointer',fontSize:'.82rem'}}>
@@ -651,9 +647,7 @@ export default function ProDashboard(){
                     ? 'Current Plan'
                     : hasBillingSubscription
                       ? `Switch to ${p.name}`
-                      : launchOfferActive
-                        ? (isCurrentPlan ? 'Activate billing' : `Activate ${p.name}`)
-                        : `Subscribe to ${p.name}`;
+                      : `Subscribe to ${p.name}`;
                 return(
                   <div key={p.id} style={{background:'#fff',borderRadius:16,padding:'24px',border:`2px solid ${isCurrentPlan?p.color:'var(--borderl)'}`,position:'relative'}}>
                     {p.popular&&<div style={{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:p.color,color:'#fff',fontSize:'.68rem',fontWeight:700,padding:'3px 12px',borderRadius:50}}>MOST POPULAR</div>}

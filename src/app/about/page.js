@@ -28,7 +28,7 @@ const FAQS = [
   },
   {
     q: 'How much does it cost for professionals to list?',
-    a: 'The first 100 professional listers get free launch access — no credit card needed at signup. Paid plans are Starter at ₹499/mo (3 listings, basics), Growth at ₹1,499/mo (10 listings + WhatsApp alerts + priority placement + analytics — most popular), and Pro at ₹3,999/mo (25 listings + featured on home page + custom firm landing page + dedicated manager). Annual billing saves you 2 months on every plan. No commission on projects you close.'
+    a: 'Professional plans are Starter at ₹499/mo (3 listings, basics), Growth at ₹1,499/mo (10 listings + WhatsApp alerts + priority placement + analytics — most popular), and Pro at ₹3,999/mo (25 listings + featured on home page + custom firm landing page + dedicated manager). Annual billing saves you 2 months on every plan. No commission on projects you close.'
   },
   {
     q: 'Can I cancel my professional subscription?',

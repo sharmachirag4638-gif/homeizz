@@ -74,7 +74,7 @@ export default async function BrowsePage({ searchParams }) {
                 List your work on Homeizz and get discovered by thousands of homeowners across India.
               </p>
               <Link href="/pro-signup" style={{padding:'13px 28px',background:'var(--t)',color:'#fff',borderRadius:50,textDecoration:'none',fontWeight:700,fontSize:'.9rem',display:'inline-block'}}>
-                List Your Work — Free Trial
+                List Your Work
               </Link>
             </div>
           ) : (

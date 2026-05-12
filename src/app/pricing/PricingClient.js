@@ -1,12 +1,12 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { PLANS, LAUNCH_OFFER_LIMIT } from '@/lib/plans';
+import { PLANS } from '@/lib/plans';
 
 const FAQ = [
   {
-    q: 'How does the first 100 listers offer work?',
-    a: `The first ${LAUNCH_OFFER_LIMIT} verified professionals who join Homeizz get free launch access while we build the marketplace. No credit card is needed at signup. You can add your profile and listings, then activate a paid plan when you are ready.`,
+    q: 'How do paid professional plans work?',
+    a: 'Choose a monthly or annual plan for your firm. Billing is handled securely through Razorpay, and you can manage plan changes or cancellation from your professional dashboard.',
   },
   {
     q: 'Do you take a commission on projects I close?',
@@ -14,7 +14,7 @@ const FAQ = [
   },
   {
     q: 'What happens if I cancel?',
-    a: 'Cancel anytime from your dashboard. Your listings stay live until the end of your current billing period, then your account moves to a free state (your profile remains, but listings are paused).',
+    a: 'Cancel anytime from your dashboard. Your listings stay live until the end of your current billing period, then your account moves to an inactive state (your profile remains, but listings are paused).',
   },
   {
     q: 'Can I upgrade or downgrade plans?',
@@ -46,27 +46,27 @@ export default function PricingClient() {
             Simple pricing.<br/>No commission. No tricks.
           </h1>
           <p style={{ fontSize: 'clamp(1rem,1.6vw,1.15rem)', color: 'var(--tm)', maxWidth: 620, margin: '0 auto', lineHeight: 1.6 }}>
-            Founding professionals can list free during launch. After that, pick a plan that fits your firm. Whatever a homeowner pays you stays 100% yours — we don't take a cut of your projects.
+            Pick a plan that fits your firm. Whatever a homeowner pays you stays 100% yours — we don't take a cut of your projects.
           </p>
         </div>
       </section>
 
-      {/* LAUNCH OFFER BANNER */}
+      {/* NO COMMISSION BANNER */}
       <section style={{ padding: '0 16px', maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ background: 'var(--sagep)', border: '1.5px solid var(--sage)', borderRadius: 16, padding: '20px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <span style={{ fontSize: '1.8rem' }}>🎉</span>
+            <span style={{ fontSize: '1.8rem' }}>🛡️</span>
             <div>
               <div style={{ fontFamily: 'var(--fd)', fontSize: '1.15rem', color: '#2D4A1F', fontWeight: 600 }}>
-                First {LAUNCH_OFFER_LIMIT} listers: free launch access
+                No commission on projects you close
               </div>
               <div style={{ fontSize: '.86rem', color: '#4A6135', marginTop: 2 }}>
-                No credit card at signup. Claim your founding spot before paid onboarding starts.
+                Homeowners contact you directly. Your subscription is the only Homeizz fee.
               </div>
             </div>
           </div>
           <Link href="/pro-signup" style={{ background: 'var(--sage)', color: '#fff', padding: '11px 22px', borderRadius: 50, fontWeight: 700, fontSize: '.88rem', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            Claim founding spot →
+            Choose your plan →
           </Link>
         </div>
       </section>
@@ -172,7 +172,7 @@ export default function PricingClient() {
                   textDecoration: 'none', marginBottom: 22,
                   fontFamily: 'inherit',
                 }}>
-                  Claim founding spot
+                  Choose Plan
                 </Link>
 
                 <div style={{ borderTop: '1px solid var(--borderl)', paddingTop: 20, flex: 1 }}>
@@ -200,7 +200,7 @@ export default function PricingClient() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 28, fontSize: '.86rem', color: 'var(--tlt)' }}>
-          Founding offer: the first <strong style={{ color: 'var(--b)' }}>{LAUNCH_OFFER_LIMIT} professional listers</strong> get free launch access. Cancel anytime. No setup fees. No commission on projects.
+          Cancel anytime. No setup fees. No commission on projects.
         </div>
       </section>
 
@@ -273,11 +273,11 @@ export default function PricingClient() {
             Ready to be seen by homeowners?
           </h2>
           <p style={{ color: 'rgba(255,255,255,.7)', fontSize: '1rem', marginBottom: 28, lineHeight: 1.6 }}>
-            Sign up takes 2 minutes. First {LAUNCH_OFFER_LIMIT} listers get free launch access. No credit card needed now.
+            Sign up takes 2 minutes. Choose a monthly or annual plan that fits your firm.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/pro-signup" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '15px 32px', background: 'var(--t)', color: '#fff', borderRadius: 50, fontWeight: 700, fontSize: '1rem', textDecoration: 'none' }}>
-              Claim founding spot →
+              Choose your plan →
             </Link>
             <Link href="/about" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '15px 32px', background: 'rgba(255,255,255,.08)', color: '#fff', borderRadius: 50, fontWeight: 600, fontSize: '1rem', textDecoration: 'none', border: '1.5px solid rgba(255,255,255,.2)' }}>
               Learn more

@@ -70,5 +70,3 @@ export const PLANS = [
     features: PRO_FEATURES,
   },
 ];
-
-export const LAUNCH_OFFER_LIMIT = 100;
