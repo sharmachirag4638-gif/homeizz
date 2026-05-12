@@ -6,6 +6,12 @@ export const TERMINAL_SUBSCRIPTION_STATUSES = ['cancelled', 'completed', 'expire
 export const CHANGEABLE_SUBSCRIPTION_STATUSES = ['authenticated', 'active'];
 export const BILLING_LIVE_STATUSES = ['authenticated', 'active'];
 
+const SUBSCRIPTION_STATUS_ORDER = {
+  created: 1,
+  authenticated: 2,
+  active: 3,
+};
+
 const RAZORPAY_PLAN_ENV = {
   starter: {
     monthly: 'RAZORPAY_PLAN_STARTER_MONTHLY',
@@ -68,6 +74,12 @@ export function hasLiveSubscription(status) {
 
 export function isTerminalSubscription(status) {
   return TERMINAL_SUBSCRIPTION_STATUSES.includes(status);
+}
+
+export function shouldPreserveNewerSubscriptionStatus(currentStatus, incomingStatus) {
+  const currentRank = SUBSCRIPTION_STATUS_ORDER[String(currentStatus || '').trim().toLowerCase()];
+  const incomingRank = SUBSCRIPTION_STATUS_ORDER[String(incomingStatus || '').trim().toLowerCase()];
+  return Number.isFinite(currentRank) && Number.isFinite(incomingRank) && incomingRank < currentRank;
 }
 
 export function unixToIso(value) {

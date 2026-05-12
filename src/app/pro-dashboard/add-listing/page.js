@@ -24,6 +24,12 @@ const PROJECT_TYPES = [
 const labelStyle = { display:'block', fontSize:'.82rem', fontWeight:600, color:'var(--b)', marginBottom:6 };
 const inputStyle = { width:'100%', padding:'12px 14px', border:'1.5px solid var(--borderl)', borderRadius:10, fontSize:'.9rem', color:'var(--b)', background:'#fff', outline:'none', fontFamily:'var(--fb)' };
 
+function hasPaidAccess(profile) {
+  const subscriptionId = String(profile?.razorpay_subscription_id || '').trim();
+  const status = String(profile?.subscription_status || '').trim().toLowerCase();
+  return !!subscriptionId && ['authenticated', 'active'].includes(status);
+}
+
 function Field({ label, type='text', value, onChange, placeholder, required }) {
   return (
     <div>
@@ -80,10 +86,7 @@ export default function AddListing() {
         .select('subscription_status, razorpay_subscription_id')
         .eq('id', data.user.id)
         .single();
-      const hasPaidAccess =
-        !!profile?.razorpay_subscription_id &&
-        ['authenticated', 'active'].includes(profile?.subscription_status);
-      if (!hasPaidAccess) { router.push('/pro-dashboard?billing=1'); return; }
+      if (!hasPaidAccess(profile)) { router.push('/pro-dashboard?billing=1'); return; }
 
       setUser(data.user);
     });

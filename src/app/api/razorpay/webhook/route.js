@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { createAdmin } from '@/lib/supabase-server';
 import {
   planFromRazorpayPlanId,
+  shouldPreserveNewerSubscriptionStatus,
   subscriptionPatchFromRazorpay,
   updateBillingMetadata,
 } from '@/lib/billing';
@@ -88,6 +89,10 @@ export async function POST(req) {
       subscription_last_payment_id: payment?.id || null,
       subscription_last_event: eventType,
     });
+
+    if (shouldPreserveNewerSubscriptionStatus(profile?.subscription_status, patch.subscription_status)) {
+      patch.subscription_status = profile.subscription_status;
+    }
 
     if (subscription.status !== 'cancelled' && subscription.ended_at == null) {
       delete patch.subscription_cancelled_at;
